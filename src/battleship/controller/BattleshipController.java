@@ -21,6 +21,12 @@ public class BattleshipController {
         scanner = new Scanner(System.in);
     }
 
+    //Constructor agregado con propositos de prueba
+    public BattleshipController(Scanner scanner){
+        currentUser = new User();
+        this.scanner = scanner;
+    }
+
     public BattleshipView getView() {
         return view;
     }
