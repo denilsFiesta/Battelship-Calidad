@@ -152,8 +152,7 @@ public class BattleshipController {
             BattleshipView.printMainMenu();
             if (requestForUserInput("", 1, 2) == 1) {
                 startGame();
-            } else
-                System.exit(0);
+            } 
             return false;
         } catch (Exception ex) {
             System.out.println("FATAL ERROR:");
