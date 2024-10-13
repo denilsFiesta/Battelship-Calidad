@@ -220,12 +220,6 @@ public class BattleshipController {
                 if (correctInput(atoms)) {
                     if (executeCurrentCommand(atoms) <= 0) {
                         System.out.println("  YOU ARE WIN THE GAME!!!");
-                        System.out.println("""
-                                ＜￣｀ヽ、　　　　　　　／ ￣ ＞
-                                　ゝ、　　＼　／⌒ヽ,ノ 　 /´
-                                　　　ゝ、 （ ( ͡◉ ͜> ͡◉) ／
-                                　　 　　>　 　 　,ノ
-                                　　　　　∠_,,,/´""");
                         System.out.println("     Total shots: " + currentUser.getActionsCounter());
                         break;
                     }
