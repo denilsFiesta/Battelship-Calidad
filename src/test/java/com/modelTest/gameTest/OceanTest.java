@@ -1,6 +1,9 @@
 package com.modelTest.gameTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,5 +120,58 @@ public class OceanTest {
             }
         }
     }
+
+    @Test
+    public void testGetPointsOccupiedByShip_nullShip() {
+        Ocean ocean = new Ocean(10, 10); 
+        List<Point> result = ocean.getPointsOccupiedByShip(null);
+        assertTrue(result.isEmpty(), "Si el barco es null, la lista de puntos debería estar vacía.");
+    }
+
+    @Test
+    public void testGetPointsOccupiedByShip_emptyOcean() {
+        Ocean ocean = mock(Ocean.class);
+        when(ocean.getSizeVertical()).thenReturn(0);
+        when(ocean.getSizeHorizontal()).thenReturn(0);
+        
+        Ship ship = mock(Ship.class);
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
+    }
+
+    @Test
+    public void testGetPointsOccupiedByShip_noMatchingPoints() {
+        Ocean ocean = new Ocean(2, 2);
+        Ship ship = mock(Ship.class);
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        assertTrue(result.isEmpty(), "Si el barco no está en ninguna posición, la lista de puntos debería estar vacía.");
+    }
+
+    @Test
+    public void testGetPointsOccupiedByShip_noMatchesButIterates() {
+        Ocean ocean = new Ocean(2, 2);
+        Ship ship = mock(Ship.class);
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+
+        assertTrue(result.isEmpty(), "Si no hay coincidencias de barco después de iterar, la lista debería estar vacía.");
+    }
+    
+    @Test
+    public void testGetPointsOccupiedByShip_matchingPoints() {
+        Ocean ocean = mock(Ocean.class);
+        Ship ship = mock(Ship.class);
+
+        when(ocean.getPointsOccupiedByShip(ship)).thenReturn(Arrays.asList(new Point(0, 0), new Point(1, 1)));
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+
+        assertEquals(2, result.size(), "El barco ocupa dos posiciones, por lo que la lista debería tener dos puntos.");
+        assertTrue(result.contains(new Point(0, 0)), "La lista de puntos debería contener la posición (0, 0).");
+        assertTrue(result.contains(new Point(1, 1)), "La lista de puntos debería contener la posición (1, 1).");
+    }
+
+
 
 }
