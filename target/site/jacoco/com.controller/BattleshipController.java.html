@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BattleshipController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Battleship-project</a> &gt; <a href="index.source.html" class="el_package">com.controller</a> &gt; <span class="el_source">BattleshipController.java</span></div><h1>BattleshipController.java</h1><pre class="source lang-java linenums">package com.controller;
+
+import com.app.App;
+import com.model.game.AttackReport;
+import com.model.game.FiringMode;
+import com.model.game.Game;
+import com.model.game.GameMode;
+import com.model.game.ocean.Point;
+import com.model.game.user.User;
+import com.view.BattleshipView;
+
+import java.util.*;
+
+public class BattleshipController {
+    private final User currentUser;
+    private BattleshipView view;
+    private final Scanner scanner;
+
+<span class="nc" id="L19">    public BattleshipController() {</span>
+<span class="nc" id="L20">        currentUser = new User();</span>
+<span class="nc" id="L21">        scanner = new Scanner(System.in);</span>
+<span class="nc" id="L22">    }</span>
+
+    //Constructor agregado con propositos de prueba
+<span class="fc" id="L25">    public BattleshipController(Scanner scanner){</span>
+<span class="fc" id="L26">        currentUser = new User();</span>
+<span class="fc" id="L27">        this.scanner = scanner;</span>
+<span class="fc" id="L28">    }</span>
+
+    public BattleshipView getView() {
+<span class="nc" id="L31">        return view;</span>
+    }
+
+    /**
+     * Start new game from user input parameters
+     */
+    public void startGame() {
+<span class="nc" id="L38">        int horizontal = -1;</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        while (horizontal == -1) {</span>
+<span class="nc" id="L40">            horizontal = requestForUserInput(&quot;Enter the horizontal size of the ocean (from 1 to 30):&quot;,</span>
+                    1, 30);
+        }
+<span class="nc" id="L43">        int vertical = -1;</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        while (vertical == -1) {</span>
+<span class="nc" id="L45">            vertical = requestForUserInput(&quot;Enter the vertical size of the ocean (from 1 to 30):&quot;,</span>
+                    1, 30);
+        }
+<span class="nc" id="L48">        view = new BattleshipView(horizontal, vertical);</span>
+
+<span class="nc" id="L50">        int[] counters = null;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        while (counters == null) {</span>
+<span class="nc" id="L52">            counters = getShipsCounters();</span>
+        }
+
+<span class="nc" id="L55">        boolean isSucceed = createNewGame(view.getHorizontalSize(), view.getVerticalSize(), counters);</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (isSucceed) {</span>
+<span class="nc" id="L57">            int torpedoCounts = -1;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            while (torpedoCounts == -1) {</span>
+<span class="nc" id="L59">                torpedoCounts = requestForTorpedoMode(counters);</span>
+            }
+<span class="nc" id="L61">            boolean shipRecoveryMode = requestForRecoveryMode();</span>
+<span class="nc" id="L62">            setGameMode(torpedoCounts, shipRecoveryMode);</span>
+        }
+<span class="nc" id="L64">    }</span>
+
+    private void setGameMode(int torpedoCounts, boolean shipRecoveryMode) {
+        try {
+<span class="nc" id="L68">            EnumSet&lt;GameMode&gt; mode = Game.recognizeMode(torpedoCounts, shipRecoveryMode);</span>
+<span class="nc" id="L69">            currentUser.getCurrentSession().setGameMode(mode, torpedoCounts);</span>
+
+<span class="nc" id="L71">        } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L72">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L73">        } catch (Exception ex) {</span>
+<span class="nc" id="L74">            System.out.println(&quot;FATAL ERROR:&quot;);</span>
+<span class="nc" id="L75">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L76">            System.out.println(Arrays.toString(ex.getStackTrace()));</span>
+<span class="nc" id="L77">        }</span>
+<span class="nc" id="L78">    }</span>
+
+    /**
+     * Start new game with arguments from terminal.
+     *
+     * @param args arguments
+     */
+    public void startGame(int[] args) {
+<span class="nc" id="L86">        int horizontal = args[0];</span>
+<span class="nc" id="L87">        int vertical = args[1];</span>
+<span class="nc" id="L88">        int[] counters = Arrays.copyOfRange(args, 2, 7);</span>
+
+        // set view ocean
+<span class="nc" id="L91">        view = new BattleshipView(horizontal, vertical);</span>
+
+<span class="nc" id="L93">        boolean isSucceed = createNewGame(horizontal, vertical, counters);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (isSucceed) {</span>
+<span class="nc" id="L95">            int torpedoCounts = -1;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            while (torpedoCounts == -1) {</span>
+<span class="nc" id="L97">                torpedoCounts = requestForTorpedoMode(counters);</span>
+            }
+<span class="nc" id="L99">            boolean shipRecoveryMode = requestForRecoveryMode();</span>
+
+<span class="nc" id="L101">            setGameMode(torpedoCounts, shipRecoveryMode);</span>
+        }
+<span class="nc" id="L103">    }</span>
+
+    private int[] getShipsCounters() {
+<span class="nc" id="L106">        int[] counters = new int[5];</span>
+<span class="nc" id="L107">        String[] typeOfShips = {&quot;Carrier&quot;, &quot;Battleship&quot;, &quot;Cruiser&quot;, &quot;Destroyer&quot;, &quot;Submarine&quot;};</span>
+        try {
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            for (int i = 0; i &lt; counters.length; i++) {</span>
+<span class="nc" id="L110">                System.out.print(&quot;Enter number of &quot; + typeOfShips[i] + &quot;s:&quot;);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">                while (scanner.hasNext()) {</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">                    if (scanner.hasNextInt()) {</span>
+<span class="nc" id="L113">                        counters[i] = scanner.nextInt();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                        if (counters[i] &gt;= 0)</span>
+<span class="nc" id="L115">                            break;</span>
+                    }
+<span class="nc" id="L117">                    System.out.println(&quot;Enter integer number no less than 0: &quot;);</span>
+                }
+            }
+<span class="nc" id="L120">        } catch (InputMismatchException ex) {</span>
+<span class="nc" id="L121">            System.out.println(&quot;Your value was so big&quot;);</span>
+<span class="nc" id="L122">            return null;</span>
+<span class="nc" id="L123">        } catch (Exception ex) {</span>
+<span class="nc" id="L124">            System.out.println(&quot;FATAL ERROR:&quot;);</span>
+<span class="nc" id="L125">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L126">            System.out.println(Arrays.toString(ex.getStackTrace()));</span>
+<span class="nc" id="L127">            return null;</span>
+<span class="nc" id="L128">        }</span>
+<span class="nc" id="L129">        return counters;</span>
+    }
+
+    private boolean requestForRecoveryMode() {
+<span class="nc" id="L133">        BattleshipView.printModeMenu(&quot;Ship recovery mode&quot;);</span>
+<span class="nc" id="L134">        int result = -1;</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        while (result == -1) {</span>
+<span class="nc" id="L136">            result = requestForUserInput(&quot;&quot;, 1, 2);</span>
+        }
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        return result == 1;</span>
+    }
+
+    private boolean createNewGame(int horizontal, int vertical, int[] counters) {
+        try {
+<span class="nc" id="L143">            Game currentGame = new Game(horizontal, vertical);</span>
+<span class="nc" id="L144">            currentGame.placeShipsOnOcean(counters);</span>
+
+<span class="nc" id="L146">            currentGame.addListener(currentUser);</span>
+<span class="nc" id="L147">            currentUser.setCurrentSession(currentGame);</span>
+<span class="nc" id="L148">            return true;</span>
+
+<span class="nc" id="L150">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L151">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L152">            BattleshipView.printMainMenu();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (requestForUserInput(&quot;&quot;, 1, 2) == 1) {</span>
+<span class="nc" id="L154">                startGame();</span>
+            } else
+<span class="nc" id="L156">                System.exit(0);</span>
+<span class="nc" id="L157">            return false;</span>
+<span class="nc" id="L158">        } catch (Exception ex) {</span>
+<span class="nc" id="L159">            System.out.println(&quot;FATAL ERROR:&quot;);</span>
+<span class="nc" id="L160">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L161">            System.out.println(Arrays.toString(ex.getStackTrace()));</span>
+<span class="nc" id="L162">            return false;</span>
+        }
+    }
+
+    /**
+     * Request for user input
+     *
+     * @param helpString help string to print first
+     * @param minBound   minimum correct integer number
+     * @param maxBound   maximum correct integer number
+     * @return option (int)
+     */
+    public int requestForUserInput(String helpString, int minBound, int maxBound) {
+<span class="fc" id="L175">        int result = -1;</span>
+<span class="fc" id="L176">        boolean inputValid = false;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        while (!inputValid) {</span>
+<span class="fc" id="L178">            System.out.print(helpString);</span>
+<span class="fc" id="L179">            String input = scanner.next();</span>
+            try {
+<span class="fc" id="L181">                result = Integer.parseInt(input);</span>
+<span class="fc bfc" id="L182" title="All 4 branches covered.">                if (result &gt;= minBound &amp;&amp; result &lt;= maxBound) {</span>
+<span class="fc" id="L183">                    inputValid = true;</span>
+                } else {
+<span class="fc" id="L185">                    System.out.printf(&quot;Enter integer number from %d to %d%n&quot;, minBound, maxBound);</span>
+                }
+<span class="nc" id="L187">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L188">                System.out.printf(&quot;Enter integer number from %d to %d%n&quot;, minBound, maxBound);</span>
+<span class="fc" id="L189">            }</span>
+<span class="fc" id="L190">        }</span>
+<span class="fc" id="L191">        return result;</span>
+    }
+
+    private int requestForTorpedoMode(int[] counters) {
+<span class="nc" id="L195">        int torpedoCounts = 0;</span>
+<span class="nc" id="L196">        BattleshipView.printModeMenu(&quot;Torpedo firing mode&quot;);</span>
+<span class="nc" id="L197">        int result = requestForUserInput(&quot;&quot;, 1, 2);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (result == 1) {</span>
+<span class="nc" id="L199">            torpedoCounts = requestForUserInput(&quot;Enter the number of available torpedo:&quot;,</span>
+<span class="nc" id="L200">                    Math.min(1, Arrays.stream(counters).sum()), Arrays.stream(counters).sum());</span>
+        }
+<span class="nc" id="L202">        return torpedoCounts;</span>
+    }
+
+    /**
+     * Execute all user input commands.
+     */
+    public void executeCommands() {
+        try {
+<span class="nc" id="L210">            scanner.nextLine();</span>
+            while (true) {
+<span class="nc" id="L212">                System.out.println(&quot;Enter command (coordinates to shot or \&quot;exit\&quot;/ \&quot;help\&quot;):&quot;);</span>
+<span class="nc" id="L213">                String inputCommand = scanner.nextLine();</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">                if (inputCommand.contains(&quot;exit&quot;)) return;</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                if (inputCommand.contains(&quot;help&quot;)) {</span>
+<span class="nc" id="L216">                    view.printHelp();</span>
+                }
+
+<span class="nc" id="L219">                String[] atoms = inputCommand.split(&quot;\\s+&quot;);</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">                if (correctInput(atoms)) {</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                    if (executeCurrentCommand(atoms) &lt;= 0) {</span>
+<span class="nc" id="L222">                        System.out.println(&quot;  YOU ARE WIN THE GAME!!!&quot;);</span>
+<span class="nc" id="L223">                        System.out.println(&quot;     Total shots: &quot; + currentUser.getActionsCounter());</span>
+<span class="nc" id="L224">                        break;</span>
+                    }
+                }
+<span class="nc" id="L227">            }</span>
+<span class="nc" id="L228">        } catch (NoSuchElementException ex) {</span>
+<span class="nc" id="L229">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L230">        } catch (IllegalStateException ex) {</span>
+<span class="nc" id="L231">            System.out.println(&quot;FATAL ERROR:&quot;);</span>
+<span class="nc" id="L232">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L233">            System.out.println(Arrays.toString(ex.getStackTrace()));</span>
+<span class="nc" id="L234">        }</span>
+<span class="nc" id="L235">    }</span>
+
+    private int executeCurrentCommand(String[] atoms) {
+        try {
+            int[] parameters;
+            FiringMode mode;
+<span class="nc bnc" id="L241" title="All 2 branches missed.">            if (atoms.length == 3) {</span>
+<span class="nc" id="L242">                parameters = App.parse(Arrays.copyOfRange(atoms, 1, 3));</span>
+<span class="nc" id="L243">                mode = FiringMode.TORPEDO_FIRING_MODE;</span>
+            } else {
+                // length == 2
+<span class="nc" id="L246">                parameters = App.parse(Arrays.copyOfRange(atoms, 0, 2));</span>
+<span class="nc" id="L247">                mode = FiringMode.GENERAL_FIRING_MODE;</span>
+            }
+<span class="nc" id="L249">            var point = new Point(parameters[0], parameters[1]);</span>
+
+<span class="nc" id="L251">            AttackReport report = currentUser.hitOnPlace(point, mode);</span>
+<span class="nc" id="L252">            String info = view.updateOcean(report);</span>
+
+            // Recovery ship mode
+<span class="nc" id="L255">            var pointsToUpdate = currentUser.getCurrentSession().getPointsToRecover();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">            if (pointsToUpdate != null) {</span>
+<span class="nc" id="L257">                view.recoverShips(pointsToUpdate);</span>
+                // clear list
+<span class="nc" id="L259">                currentUser.getCurrentSession().clearPointsToRecover();</span>
+            }
+
+<span class="nc" id="L262">            view.printOcean(&quot;\&quot;.\&quot; - miss  \&quot;*\&quot; - hit  \&quot;x\&quot; - sunk\n&quot; + info);</span>
+<span class="nc" id="L263">            return report.getFleetHealthRemaining();</span>
+
+<span class="nc" id="L265">        } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L266">            System.out.println(&quot;Incorrect command format. Enter \&quot;help\&quot; to see details&quot;);</span>
+<span class="nc" id="L267">            return 1;</span>
+<span class="nc" id="L268">        } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L269">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L270">            return 1;</span>
+<span class="nc" id="L271">        } catch (Exception ex) {</span>
+<span class="nc" id="L272">            System.out.println(&quot;FATAL ERROR:&quot;);</span>
+<span class="nc" id="L273">            System.out.println(ex.getMessage());</span>
+<span class="nc" id="L274">            System.out.println(Arrays.toString(ex.getStackTrace()));</span>
+<span class="nc" id="L275">            return 0;</span>
+        }
+    }
+
+    private boolean correctInput(String[] atoms) {
+<span class="nc bnc" id="L280" title="All 4 branches missed.">        if (atoms.length &lt; 2 || atoms.length &gt; 3) return false;</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (atoms.length == 3) {</span>
+<span class="nc bnc" id="L282" title="All 4 branches missed.">            if (!Objects.equals(atoms[0], &quot;T&quot;) &amp;&amp; !Objects.equals(atoms[0], &quot;t&quot;))</span>
+<span class="nc" id="L283">                return false;</span>
+            try {
+<span class="nc" id="L285">                App.parse(Arrays.copyOfRange(atoms, 1, 2));</span>
+<span class="nc" id="L286">            } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L287">                return false;</span>
+<span class="nc" id="L288">            }</span>
+        } else {
+            try {
+<span class="nc" id="L291">                App.parse(Arrays.copyOfRange(atoms, 0, 1));</span>
+<span class="nc" id="L292">            } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L293">                return false;</span>
+<span class="nc" id="L294">            }</span>
+        }
+<span class="nc" id="L296">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

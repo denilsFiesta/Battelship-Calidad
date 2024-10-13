@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Ship.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Battleship-project</a> &gt; <a href="index.source.html" class="el_package">com.model.ships</a> &gt; <span class="el_source">Ship.java</span></div><h1>Ship.java</h1><pre class="source lang-java linenums">package com.model.ships;
+
+import com.model.game.FiringMode;
+import com.model.game.HealthReport;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Ship {
+    protected int health;
+
+<span class="nc" id="L12">    protected Ship(int health) {</span>
+<span class="nc" id="L13">        this.health = health;</span>
+<span class="nc" id="L14">    }</span>
+
+    /**
+     * Hit the ship with firing mode.
+     *
+     * @param firingMode if TORPEDO_FIRING_MODE -&gt; ship immediately get sunk. if GENERAL_FIRING_MODE -&gt; health--.
+     * @return healthReport with health remaining and power(health) of attack.
+     */
+    public HealthReport hitTheShip(FiringMode firingMode) {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (firingMode == FiringMode.TORPEDO_FIRING_MODE) {</span>
+<span class="nc" id="L24">            int healthRemaining = health;</span>
+<span class="nc" id="L25">            health = 0;</span>
+<span class="nc" id="L26">            return new HealthReport(health, healthRemaining);</span>
+        }
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (health &gt; 0)</span>
+<span class="nc" id="L29">            return new HealthReport(--health, 1);</span>
+        else
+<span class="nc" id="L31">            return new HealthReport(0, 0);</span>
+    }
+
+    /**
+     * @return length of the ship (MAX_HEALTH = length).
+     */
+    public abstract int getLength();
+
+    /**
+     * When the recovery mode is enabled this method restore.
+     * health of the ship to MAX_HEALTH (depends on the ship type).
+     */
+    public abstract void restoreHealthInRecoveryMode();
+
+    /**
+     * Converts input integers, where these numbers are listed in the order
+     * which corresponds to ship types size, to list of ships.
+     *
+     * @param counters Array of integers.
+     * @return List of the ships (sorted by length descending)
+     */
+    public static List&lt;Ship&gt; convertInputIntegersToShips(int[] counters) {
+<span class="nc" id="L53">        List&lt;Ship&gt; ships = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        for (int i = 0; i &lt; counters.length; i++) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            for (int j = 0; j &lt; counters[i]; j++) {</span>
+<span class="nc bnc" id="L56" title="All 6 branches missed.">                switch (i) {</span>
+<span class="nc" id="L57">                    case 0 -&gt; ships.add(new Carrier());</span>
+<span class="nc" id="L58">                    case 1 -&gt; ships.add(new Battleship());</span>
+<span class="nc" id="L59">                    case 2 -&gt; ships.add(new Cruiser());</span>
+<span class="nc" id="L60">                    case 3 -&gt; ships.add(new Destroyer());</span>
+<span class="nc" id="L61">                    case 4 -&gt; ships.add(new Submarine());</span>
+                }
+            }
+        }
+<span class="nc" id="L65">        return ships;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
