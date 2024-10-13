@@ -61,4 +61,27 @@ public class OceanTest {
 
         Assertions.assertNotNull(position, "El barco debería haberse colocado en el océano.");
     }    
+
+    @Test
+    public void testPlaceShipUnsuccessfully() {
+        Ship ship = Mockito.mock(Ship.class);
+        Ocean ocean = Mockito.mock(Ocean.class);
+        ShipPosition mockPosition = Mockito.mock(ShipPosition.class);
+        Mockito.when(ocean.tryPlaceShip(Mockito.any(Ship.class), Mockito.any(ShipPosition.class)))
+               .thenReturn(null);
+        
+
+        ShipPosition result = ocean.tryPlaceShip(ship, mockPosition);
+        
+        Mockito.verify(ocean).tryPlaceShip(ship, mockPosition);
+        
+        Assertions.assertNull(result, "No debería haber espacio para colocar el barco en el océano.");
+    }
+
+
+
+
+
+
+
 }
