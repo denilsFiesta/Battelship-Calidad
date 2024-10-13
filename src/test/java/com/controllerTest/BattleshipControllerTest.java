@@ -88,6 +88,14 @@ public class BattleshipControllerTest {
     }
 
     @Test
+    public void testStartGameArgs_invalidInput(){
+        int args[] = {10, 10, 5, 5, 5, 5, 5}; 
+        Scanner scannerSimulado = new Scanner("2\n"); 
+        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        battleshipController.startGame(args);
+    }
+
+    @Test
     public void testGetShipsCounters_correcInput(){
         Scanner scannerSimulado = new Scanner("10 10 0 0 0 0 1 1 1 1\n"); 
         BattleshipController battleshipController = new BattleshipController(scannerSimulado);
