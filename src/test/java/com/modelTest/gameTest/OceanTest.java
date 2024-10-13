@@ -3,6 +3,7 @@ package com.modelTest.gameTest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,6 +157,21 @@ public class OceanTest {
 
         assertTrue(result.isEmpty(), "Si no hay coincidencias de barco después de iterar, la lista debería estar vacía.");
     }
+    
+    @Test
+    public void testGetPointsOccupiedByShip_matchingPoints() {
+        Ocean ocean = mock(Ocean.class);
+        Ship ship = mock(Ship.class);
+
+        when(ocean.getPointsOccupiedByShip(ship)).thenReturn(Arrays.asList(new Point(0, 0), new Point(1, 1)));
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+
+        assertEquals(2, result.size(), "El barco ocupa dos posiciones, por lo que la lista debería tener dos puntos.");
+        assertTrue(result.contains(new Point(0, 0)), "La lista de puntos debería contener la posición (0, 0).");
+        assertTrue(result.contains(new Point(1, 1)), "La lista de puntos debería contener la posición (1, 1).");
+    }
+
 
 
 }
