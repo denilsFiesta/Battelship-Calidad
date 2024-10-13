@@ -1,6 +1,8 @@
 package com.modelTest.gameTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,4 +127,14 @@ public class OceanTest {
         assertTrue(result.isEmpty(), "Si el barco es null, la lista de puntos debería estar vacía.");
     }
 
+    @Test
+    public void testGetPointsOccupiedByShip_emptyOcean() {
+        Ocean ocean = mock(Ocean.class);
+        when(ocean.getSizeVertical()).thenReturn(0);
+        when(ocean.getSizeHorizontal()).thenReturn(0);
+        
+        Ship ship = mock(Ship.class);
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
+    }
 }
