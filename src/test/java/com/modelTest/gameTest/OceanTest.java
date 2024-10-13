@@ -137,4 +137,13 @@ public class OceanTest {
         List<Point> result = ocean.getPointsOccupiedByShip(ship);
         assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
     }
+
+    @Test
+    public void testGetPointsOccupiedByShip_noMatchingPoints() {
+        Ocean ocean = new Ocean(2, 2);
+        Ship ship = mock(Ship.class);
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        assertTrue(result.isEmpty(), "Si el barco no está en ninguna posición, la lista de puntos debería estar vacía.");
+    }
 }
