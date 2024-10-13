@@ -3,16 +3,20 @@ package com.modelTest.gameTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.model.game.ocean.Ocean;
 import com.model.game.ocean.Point;
 import com.model.game.ocean.ShipPosition;
 import com.model.ships.Ship;
+import java.lang.reflect.Method; 
+
 public class OceanTest {
 
     @Test
@@ -79,9 +83,39 @@ public class OceanTest {
     }
 
 
+    @Test
+    public void testPlaceShipAfterMaxAttempts() {
+        Ocean ocean = new Ocean(2, 2); 
 
+        Ship ship = Mockito.mock(Ship.class);
+        Mockito.when(ship.getLength()).thenReturn(3); 
 
+        boolean shipPlaced = false;
 
+        for (int y = 0; y < ocean.getSizeVertical(); y++) {
+            for (int x = 0; x < ocean.getSizeHorizontal(); x++) {
+                // Probar cada dirección válida
+                for (ShipPosition.Direction direction : ShipPosition.Direction.values()) {
+                    ShipPosition position = new ShipPosition(new Point(x, y), direction);
+                    ShipPosition result = ocean.tryPlaceShip(ship, position);
+                    if (result != null) {
+                        shipPlaced = true;
+                        break; 
+                    }
+                }
+                if (shipPlaced) break; 
+            }
+            if (shipPlaced) break; 
+        }
 
+        Assertions.assertFalse(shipPlaced, "No debería ser posible colocar un barco de tamaño 3 en un océano 2x2.");
+
+        for (int y = 0; y < ocean.getSizeVertical(); y++) {
+            for (int x = 0; x < ocean.getSizeHorizontal(); x++) {
+                Assertions.assertTrue(ocean.isEmpty(new Point(x, y)),
+                    "El océano debería estar vacío en la posición (" + x + ", " + y + ")");
+            }
+        }
+    }
 
 }
