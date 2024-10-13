@@ -118,4 +118,11 @@ public class OceanTest {
         }
     }
 
+    @Test
+    public void testGetPointsOccupiedByShip_nullShip() {
+        Ocean ocean = new Ocean(10, 10); 
+        List<Point> result = ocean.getPointsOccupiedByShip(null);
+        assertTrue(result.isEmpty(), "Si el barco es null, la lista de puntos debería estar vacía.");
+    }
+
 }
