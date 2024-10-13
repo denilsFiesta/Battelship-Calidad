@@ -111,10 +111,11 @@ public class BattleshipControllerTest {
     }
 
     @Test
-    public void testExecuteCommands_WinGame(){
+    public void testExecuteCommands_HelpAndWinCommand(){
         int args[] = {10, 10, 0, 0, 0, 0, 0};
         List<String> inputs = Arrays.asList(
             "1 0 1\n",
+            "help\n",
             "0 0\n"
         );
         
@@ -122,22 +123,22 @@ public class BattleshipControllerTest {
         Scanner scannerSimulado = new Scanner(customInputStream);
         BattleshipController battleshipController = new BattleshipController(scannerSimulado);
         battleshipController.startGame(args);
-        battleshipController.executeCommands(true);
+        battleshipController.executeCommands();
     }
 
     @Test
-    public void testExecuteCommands_HelpWindow(){
+    public void testExecuteCommands_ExitCommand(){
         int args[] = {10, 10, 0, 0, 0, 0, 0};
         List<String> inputs = Arrays.asList(
             "1 0 1\n",
-            "help\n"
+            "exit\n"
         );
         
         CustomInputStream customInputStream = new CustomInputStream(inputs);
         Scanner scannerSimulado = new Scanner(customInputStream);
         BattleshipController battleshipController = new BattleshipController(scannerSimulado);
         battleshipController.startGame(args);
-        battleshipController.executeCommands(true);
+        battleshipController.executeCommands();
     }
 
 }
