@@ -10,9 +10,22 @@ public class OceanTest {
 
     @Test
     public void testOceanCreation_invalidHorizontalAndVerticalSize() {
-        // Verificamos que se lanza IllegalArgumentException al intentar crear Ocean con tamaño inválido
         assertThrows(IllegalArgumentException.class, () -> {
-            new Ocean(0, 0); // Ambos tamaños fuera del rango permitido
+            new Ocean(0, 0);
+        });
+    }
+
+    @Test
+    public void testOceanCreation_invalidHorizontalSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Ocean(31, 10); 
+        });
+    }
+
+    @Test
+    public void testOceanCreation_invalidVerticalSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Ocean(10, 31); 
         });
     }
 
