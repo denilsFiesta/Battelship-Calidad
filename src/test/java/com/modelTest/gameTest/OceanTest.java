@@ -201,14 +201,28 @@ public class OceanTest {
 
     @Test
     public void testGetRange_DOWN() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(0, 3);
+        Point start = new Point(0, 5);
+        Point end = new Point(0, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
+        Point[] expectedRange = new Point[]{
+            new Point(0, 5),
+            new Point(0, 4),
+            new Point(0, 3),
+            new Point(0, 2),
+            new Point(0, 1),
+            new Point(0, 0)
+        };
 
-        Point[] result = Point.getRange(startPos, endPos, direction);
+        Point[] result = Point.getRange(start, end, direction);
 
-        assertArrayEquals(new Point[]{new Point(0, 0), new Point(0, 1), new Point(0, 2), new Point(0, 3)}, result);
-    }
+        assertNotNull(result, "El resultado no debería ser nulo");
+        assertEquals(expectedRange.length, result.length, "La longitud del array debería ser 6");
+
+        for (int i = 0; i < result.length; i++) {
+            assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
+        }
+}
+
 
     @Test
     public void testGetRange_LEFT() {
@@ -232,13 +246,21 @@ public class OceanTest {
     }
 
     @Test
-    public void testGetRange_WithCycle() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(0, 4); 
-        ShipPosition.Direction direction = ShipPosition.Direction.UP;
+public void testGetRange_WithCycle() {
+    Point startPos = new Point(0, 0);
+    Point endPos = new Point(0, 4); 
+    ShipPosition.Direction direction = ShipPosition.Direction.UP;
 
-        Point[] result = Point.getRange(startPos, endPos, direction);
+    Point[] result = Point.getRange(startPos, endPos, direction);
 
-        assertArrayEquals(new Point[]{new Point(0, 0), new Point(0, -1), new Point(0, -2), new Point(0, -3), new Point(0, -4)}, result);
-    }
+    // Se espera un rango desde (0, 0) hasta (0, -4)
+    assertArrayEquals(new Point[]{
+        new Point(0, 0), 
+        new Point(0, -1), 
+        new Point(0, -2), 
+        new Point(0, -3), 
+        new Point(0, -4)
+    }, result);
+}
+
 }
