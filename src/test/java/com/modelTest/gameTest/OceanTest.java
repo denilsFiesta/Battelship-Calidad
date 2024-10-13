@@ -2,9 +2,17 @@ package com.modelTest.gameTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.model.game.ocean.Ocean;
+import com.model.game.ocean.Point;
+import com.model.game.ocean.ShipPosition;
+import com.model.ships.Ship;
 public class OceanTest {
 
     @Test
@@ -44,5 +52,16 @@ public class OceanTest {
         assertEquals(10, ocean.getSizeVertical(), "El tamaño vertical debe ser 10");
     }
 
+    @Test
+    public void testPlaceShipSuccessfully() {
 
+        Ship ship = Mockito.mock(Ship.class);
+        Ocean ocean = new Ocean(10, 10);
+
+        ShipPosition position = ShipPosition.getRandomShipPosition(ocean, ship);
+
+        Assertions.assertNotNull(position, "El barco debería haberse colocado en el océano.");
+    }
+
+    
 }
