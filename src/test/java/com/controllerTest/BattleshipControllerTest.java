@@ -37,12 +37,12 @@ public class BattleshipControllerTest {
         assertEquals(3, result, "La entra 0 es valida en el rango [1,5]");
     }
 
-    // @Test
-    // public void testRequestForUserInput_tryCatchError(){
-    //     Scanner scannerSimulado = new Scanner("a\n 3\n"); 
-    //     BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+    @Test
+    public void testRequestForUserInput_tryCatchError(){
+        Scanner scannerSimulado = new Scanner("a 3\n"); 
+        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
 
-    //     int result = battleshipController.requestForUserInput("", 1, 5);
-    //     assertEquals("La entra a es valida en el rango [1,5]", 3, result);
-    // }
+        int result = battleshipController.requestForUserInput("", 1, 5);
+        assertEquals(3, result, "La entra a es valida en el rango [1,5]");
+    }
 }
