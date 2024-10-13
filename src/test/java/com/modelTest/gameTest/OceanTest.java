@@ -175,15 +175,6 @@ public class OceanTest {
         assertTrue(result.contains(new Point(1, 1)), "La lista de puntos debería contener la posición (1, 1).");
     }
 
-
-    private Ocean ocean; // Simularemos Ocean
-
-    @BeforeEach
-    public void setUp() {
-        // Crea un mock de la clase Ocean
-        ocean = mock(Ocean.class);
-    }
-
     @Test
     public void testGetRange_UP() {
         Point start = new Point(0, 0);
@@ -206,6 +197,17 @@ public class OceanTest {
         for (int i = 0; i < result.length; i++) {
             assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
         }
-}
+    }
+
+    @Test
+    public void testGetRange_DOWN() {
+        Point startPos = new Point(0, 0);
+        Point endPos = new Point(0, 3);
+        ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
+
+        Point[] result = Point.getRange(startPos, endPos, direction);
+
+        assertArrayEquals(new Point[]{new Point(0, 0), new Point(0, 1), new Point(0, 2), new Point(0, 3)}, result);
+    }
 
 }
