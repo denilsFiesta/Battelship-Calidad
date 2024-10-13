@@ -20,8 +20,8 @@ public record Point(int x, int y) {
 
         for (int i = 1; i < range.length; i++) {
             switch (direction) {
-                case UP -> --currentY;
-                case DOWN -> ++currentY;
+                case UP -> ++currentY;
+                case DOWN -> --currentY;
                 case LEFT -> --currentX;
                 case RIGHT -> ++currentX;
             }
@@ -52,7 +52,7 @@ public record Point(int x, int y) {
      * @return upper point
      */
     public Point getUp() {
-        return new Point(x, y - 1);
+        return new Point(x, y + 1);
     }
 
     /**
@@ -66,14 +66,14 @@ public record Point(int x, int y) {
      * @return up and right point
      */
     public Point getUpAndRight() {
-        return new Point(x + 1, y - 1);
+        return new Point(x + 1, y + 1);
     }
 
     /**
      * @return down and right point
      */
     public Point getDownAndRight() {
-        return new Point(x + 1, y + 1);
+        return new Point(x + 1, y - 1);
     }
 
     /**
