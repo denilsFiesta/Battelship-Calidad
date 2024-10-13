@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Ocean.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Battleship-project</a> &gt; <a href="index.source.html" class="el_package">com.model.game.ocean</a> &gt; <span class="el_source">Ocean.java</span></div><h1>Ocean.java</h1><pre class="source lang-java linenums">package com.model.game.ocean;
+
+import com.model.ships.Ship;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Ocean {
+    private final int sizeHorizontal;
+    private final int sizeVertical;
+    private final Ship[][] ocean;
+
+    /**
+     * @return horizontal size of the ocean
+     */
+    public int getSizeHorizontal() {
+<span class="nc" id="L17">        return sizeHorizontal;</span>
+    }
+
+    /**
+     * @return vertical size of the ocean
+     */
+    public int getSizeVertical() {
+<span class="nc" id="L24">        return sizeVertical;</span>
+    }
+
+<span class="nc" id="L27">    public Ocean(int sizeHorizontal, int sizeVertical) throws IllegalArgumentException {</span>
+<span class="nc bnc" id="L28" title="All 8 branches missed.">        if ((sizeHorizontal &lt; 1 || sizeHorizontal &gt; 30) || (sizeVertical &lt; 1 || sizeVertical &gt; 30)) {</span>
+<span class="nc" id="L29">            throw new IllegalArgumentException(&quot;Cannot create the Ocean with size: %dx%d&quot;.formatted(sizeHorizontal, sizeVertical));</span>
+        }
+
+<span class="nc" id="L32">        this.sizeHorizontal = sizeHorizontal;</span>
+<span class="nc" id="L33">        this.sizeVertical = sizeVertical;</span>
+<span class="nc" id="L34">        ocean = new Ship[sizeVertical][sizeHorizontal];</span>
+<span class="nc" id="L35">    }</span>
+
+    private static final int MAX_ATTEMPTS = 30;
+
+    /**
+     * Random place list of ships
+     *
+     * @param ships list of ships to place
+     * @param ocean ocean on which ships needs to be placed
+     * @return Ocean
+     */
+    public static Ocean randomPlace(List&lt;Ship&gt; ships, Ocean ocean) {
+<span class="nc" id="L47">        int attempts = 0;</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        while (attempts++ &lt; MAX_ATTEMPTS) {</span>
+<span class="nc" id="L49">            Ocean newOcean = getRandomOcean(ships, ocean);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            if (newOcean != null) {</span>
+<span class="nc" id="L51">                return newOcean;</span>
+            }
+<span class="nc" id="L53">        }</span>
+<span class="nc" id="L54">        return null;</span>
+    }
+
+    private static Ocean getRandomOcean(List&lt;Ship&gt; ships, Ocean ocean) {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (Ship ship : ships) {</span>
+<span class="nc" id="L59">            ShipPosition pos = ShipPosition.getRandomShipPosition(ocean, ship);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (pos == null)</span>
+<span class="nc" id="L61">                return null;</span>
+<span class="nc" id="L62">        }</span>
+<span class="nc" id="L63">        return ocean;</span>
+    }
+
+    /**
+     * @param pos position to check
+     * @return true if it is empty, otherwise false.
+     */
+    public boolean isEmpty(Point pos) {
+<span class="nc" id="L71">        Ship ship = getShipByPosition(pos);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        return ship == null;</span>
+    }
+
+    /**
+     * @param pos position
+     * @return Ship on position, if position is out of ocean or empty return null
+     */
+    public Ship getShipByPosition(Point pos) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (indexOutOfOcean(pos)) return null;</span>
+<span class="nc" id="L81">        return ocean[pos.y()][pos.x()];</span>
+    }
+
+    /**
+     * if it is impossible to place ship, method returns null;
+     * if possible -&gt; place ship on position
+     *
+     * @param shipToPlace  ship to place
+     * @param shipPosition position
+     * @return ShipPosition
+     */
+    public ShipPosition tryPlaceShip(Ship shipToPlace, ShipPosition shipPosition) {
+<span class="nc bnc" id="L93" title="All 5 branches missed.">        return switch (shipPosition.getDirection()) {</span>
+<span class="nc" id="L94">            case RIGHT -&gt; placeShipRight(shipToPlace, shipPosition);</span>
+<span class="nc" id="L95">            case UP -&gt; placeShipUp(shipToPlace, shipPosition);</span>
+<span class="nc" id="L96">            case LEFT -&gt; placeShipLeft(shipToPlace, shipPosition);</span>
+<span class="nc" id="L97">            case DOWN -&gt; placeShipDown(shipToPlace, shipPosition);</span>
+        };
+    }
+
+    private boolean indexOutOfOcean(Point pos) {
+<span class="nc bnc" id="L102" title="All 8 branches missed.">        return (pos.y() &lt; 0 || pos.y() &gt;= sizeVertical) || (pos.x() &lt; 0 || pos.x() &gt;= sizeHorizontal);</span>
+    }
+
+    private boolean badIndexRange(Point startPos, Point endPos, ShipPosition.Direction direction) {
+<span class="nc bnc" id="L106" title="All 4 branches missed.">        if (indexOutOfOcean(startPos) || indexOutOfOcean(endPos)) return true;</span>
+
+<span class="nc" id="L108">        Point[] positionRange = Point.getRange(startPos, endPos, direction);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        for (Point point : positionRange) {</span>
+<span class="nc bnc" id="L110" title="All 5 branches missed.">            switch (direction) {</span>
+                case UP -&gt; {
+                    // if this is the beginning of the ship, check below, down and right and down and left
+<span class="nc bnc" id="L113" title="All 4 branches missed.">                    if (point.equals(startPos) &amp;&amp; (getShipByPosition(point.getDown()) != null ||</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndLeft()) != null ||</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndRight()) != null))</span>
+<span class="nc" id="L116">                        return true;</span>
+
+                    // if this is the end of the ship, check up, up and to the right and up and to the left
+<span class="nc bnc" id="L119" title="All 4 branches missed.">                    if (point.equals(endPos) &amp;&amp; (getShipByPosition(point.getUp()) != null ||</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndRight()) != null ||</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndLeft()) != null))</span>
+<span class="nc" id="L122">                        return true;</span>
+
+                    // check left and right
+<span class="nc bnc" id="L125" title="All 4 branches missed.">                    if (getShipByPosition(point.getLeft()) != null || getShipByPosition(point.getRight()) != null)</span>
+<span class="nc" id="L126">                        return true;</span>
+                }
+                case DOWN -&gt; {
+                    // if this is the beginning of the ship, check up, up and to the right and up and to the left
+<span class="nc bnc" id="L130" title="All 4 branches missed.">                    if (point.equals(startPos) &amp;&amp; (getShipByPosition(point.getUp()) != null ||</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndRight()) != null ||</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndLeft()) != null))</span>
+<span class="nc" id="L133">                        return true;</span>
+
+                    // if this is the end of the ship, check below, down and right and down and left
+<span class="nc bnc" id="L136" title="All 4 branches missed.">                    if (point.equals(endPos) &amp;&amp; (getShipByPosition(point.getDown()) != null ||</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndLeft()) != null ||</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndRight()) != null))</span>
+<span class="nc" id="L139">                        return true;</span>
+
+                    // check left and right
+<span class="nc bnc" id="L142" title="All 4 branches missed.">                    if (getShipByPosition(point.getLeft()) != null || getShipByPosition(point.getRight()) != null)</span>
+<span class="nc" id="L143">                        return true;</span>
+                }
+                case LEFT -&gt; {
+                    // if this is the beginning of the ship, check right, right and down and right and up
+<span class="nc bnc" id="L147" title="All 4 branches missed.">                    if (point.equals(startPos) &amp;&amp; (getShipByPosition(point.getRight()) != null ||</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndRight()) != null ||</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndRight()) != null))</span>
+<span class="nc" id="L150">                        return true;</span>
+
+                    // if this is the end of the ship, check left, left and down and right and up
+<span class="nc bnc" id="L153" title="All 4 branches missed.">                    if (point.equals(endPos) &amp;&amp; (getShipByPosition(point.getLeft()) != null ||</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndLeft()) != null ||</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndLeft()) != null))</span>
+<span class="nc" id="L156">                        return true;</span>
+                    // check from above and below
+<span class="nc bnc" id="L158" title="All 4 branches missed.">                    if (getShipByPosition(point.getUp()) != null || getShipByPosition(point.getDown()) != null)</span>
+<span class="nc" id="L159">                        return true;</span>
+                }
+                case RIGHT -&gt; {
+                    // if this is the beginning of the ship, check left, left and down and right and up
+<span class="nc bnc" id="L163" title="All 4 branches missed.">                    if (point.equals(startPos) &amp;&amp; (getShipByPosition(point.getLeft()) != null ||</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndLeft()) != null ||</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndLeft()) != null))</span>
+<span class="nc" id="L166">                        return true;</span>
+
+                    // if this is the end of the ship, check right, right and down and right and up
+<span class="nc bnc" id="L169" title="All 4 branches missed.">                    if (point.equals(endPos) &amp;&amp; (getShipByPosition(point.getRight()) != null ||</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                            getShipByPosition(point.getUpAndRight()) != null ||</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                            getShipByPosition(point.getDownAndRight()) != null))</span>
+<span class="nc" id="L172">                        return true;</span>
+
+                    // check from above and below
+<span class="nc bnc" id="L175" title="All 4 branches missed.">                    if (getShipByPosition(point.getUp()) != null || getShipByPosition(point.getDown()) != null)</span>
+<span class="nc" id="L176">                        return true;</span>
+                }
+            }
+        }
+<span class="nc" id="L180">        return false;</span>
+    }
+
+    private ShipPosition placeShipRight(Ship shipToPlace, ShipPosition startPos) {
+<span class="nc" id="L184">        Point endPos = new Point(startPos.getX() + shipToPlace.getLength() - 1,</span>
+<span class="nc" id="L185">                startPos.getY());</span>
+
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (badIndexRange(startPos.getPosition(), endPos, startPos.getDirection()))</span>
+<span class="nc" id="L188">            return null;</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        for (int i = startPos.getX(); i &lt;= endPos.x(); i++) {</span>
+<span class="nc" id="L191">            ocean[startPos.getY()][i] = shipToPlace;</span>
+        }
+<span class="nc" id="L193">        return startPos;</span>
+    }
+
+    private ShipPosition placeShipLeft(Ship shipToPlace, ShipPosition startPos) {
+<span class="nc" id="L197">        Point endPos = new Point(startPos.getX() - shipToPlace.getLength() + 1,</span>
+<span class="nc" id="L198">                startPos.getY());</span>
+
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (badIndexRange(startPos.getPosition(), endPos, startPos.getDirection()))</span>
+<span class="nc" id="L201">            return null;</span>
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        for (int i = startPos.getX(); i &gt;= endPos.x(); i--) {</span>
+<span class="nc" id="L204">            ocean[startPos.getY()][i] = shipToPlace;</span>
+        }
+<span class="nc" id="L206">        return startPos;</span>
+    }
+
+    private ShipPosition placeShipUp(Ship shipToPlace, ShipPosition startPos) {
+<span class="nc" id="L210">        Point endPos = new Point(startPos.getX(),</span>
+<span class="nc" id="L211">                startPos.getY() - shipToPlace.getLength() + 1);</span>
+
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if (badIndexRange(startPos.getPosition(), endPos, startPos.getDirection()))</span>
+<span class="nc" id="L214">            return null;</span>
+
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        for (int i = endPos.y(); i &lt;= startPos.getY(); i++) {</span>
+<span class="nc" id="L217">            ocean[i][startPos.getX()] = shipToPlace;</span>
+        }
+<span class="nc" id="L219">        return startPos;</span>
+    }
+
+    private ShipPosition placeShipDown(Ship shipToPlace, ShipPosition startPos) {
+<span class="nc" id="L223">        Point endPos = new Point(startPos.getX(),</span>
+<span class="nc" id="L224">                startPos.getY() + shipToPlace.getLength() - 1);</span>
+
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (badIndexRange(startPos.getPosition(), endPos, startPos.getDirection()))</span>
+<span class="nc" id="L227">            return null;</span>
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        for (int i = startPos.getY(); i &lt;= endPos.y(); i++) {</span>
+<span class="nc" id="L230">            ocean[i][startPos.getX()] = shipToPlace;</span>
+        }
+<span class="nc" id="L232">        return startPos;</span>
+    }
+
+    /**
+     * get list of points which is occupied by ship
+     *
+     * @param attackingShip ship
+     * @return list of points
+     */
+    public List&lt;Point&gt; getPointsOccupiedByShip(Ship attackingShip) {
+<span class="nc" id="L242">        List&lt;Point&gt; shipPoints = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if (attackingShip != null) {</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">            for (int i = 0; i &lt; ocean.length; i++) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                for (int j = 0; j &lt; ocean[0].length; j++) {</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                    if (attackingShip.equals(ocean[i][j]))</span>
+<span class="nc" id="L247">                        shipPoints.add(new Point(j, i));</span>
+                }
+            }
+        }
+<span class="nc" id="L251">        return shipPoints;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
