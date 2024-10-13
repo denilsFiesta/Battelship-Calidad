@@ -125,4 +125,19 @@ public class BattleshipControllerTest {
         battleshipController.executeCommands(true);
     }
 
+    @Test
+    public void testExecuteCommands_HelpWindow(){
+        int args[] = {10, 10, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "1 0 1\n",
+            "help\n"
+        );
+        
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        Scanner scannerSimulado = new Scanner(customInputStream);
+        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        battleshipController.startGame(args);
+        battleshipController.executeCommands(true);
+    }
+
 }
