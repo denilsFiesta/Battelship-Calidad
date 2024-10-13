@@ -204,7 +204,11 @@ public class BattleshipController {
     /**
      * Execute all user input commands.
      */
-    public void executeCommands() {
+    public void executeCommands(){
+        executeCommands(false);
+    }
+
+    public void executeCommands(boolean proof) {
         try {
             scanner.nextLine();
             while (true) {
@@ -223,6 +227,7 @@ public class BattleshipController {
                         break;
                     }
                 }
+                if(proof) break;
             }
         } catch (NoSuchElementException ex) {
             System.out.println(ex.getMessage());

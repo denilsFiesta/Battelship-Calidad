@@ -12,6 +12,7 @@ import java.util.Scanner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.CustomInputStream;
 import com.controller.BattleshipController;
 import com.model.game.Game;
 import com.model.game.user.User;
@@ -107,6 +108,21 @@ public class BattleshipControllerTest {
         Scanner scannerSimulado = new Scanner("10 10 -1 0 0 0 0 1 1 1 1\n"); 
         BattleshipController battleshipController = new BattleshipController(scannerSimulado);
         battleshipController.startGame();
+    }
+
+    @Test
+    public void testExecuteCommands_WinGame(){
+        int args[] = {10, 10, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "1 0 1\n",
+            "0 0\n"
+        );
+        
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        Scanner scannerSimulado = new Scanner(customInputStream);
+        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        battleshipController.startGame(args);
+        battleshipController.executeCommands(true);
     }
 
 }
