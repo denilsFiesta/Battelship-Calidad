@@ -54,14 +54,11 @@ public class OceanTest {
 
     @Test
     public void testPlaceShipSuccessfully() {
-
         Ship ship = Mockito.mock(Ship.class);
         Ocean ocean = new Ocean(10, 10);
 
         ShipPosition position = ShipPosition.getRandomShipPosition(ocean, ship);
 
         Assertions.assertNotNull(position, "El barco debería haberse colocado en el océano.");
-    }
-
-    
+    }    
 }
