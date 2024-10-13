@@ -20,8 +20,8 @@ public record Point(int x, int y) {
 
         for (int i = 1; i < range.length; i++) {
             switch (direction) {
-                case UP -> --currentY;
-                case DOWN -> ++currentY;
+                case DOWN  -> --currentY;
+                case UP -> ++currentY;
                 case LEFT -> --currentX;
                 case RIGHT -> ++currentX;
             }

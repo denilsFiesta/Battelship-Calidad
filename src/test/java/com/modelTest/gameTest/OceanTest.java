@@ -219,5 +219,15 @@ public class OceanTest {
         Point[] result = Point.getRange(startPos, endPos, direction);
 
         assertArrayEquals(new Point[]{new Point(0, 0), new Point(-1, 0), new Point(-2, 0), new Point(-3, 0)}, result);
-}
+    }
+    @Test
+    public void testGetRange_RIGHT() {
+        Point startPos = new Point(0, 0);
+        Point endPos = new Point(3, 0);
+        ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
+
+        Point[] result = Point.getRange(startPos, endPos, direction);
+
+        assertArrayEquals(new Point[]{new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0)}, result);
+    }
 }
