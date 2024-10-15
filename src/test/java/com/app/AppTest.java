@@ -64,4 +64,10 @@ public class AppTest {
         System.setIn(customInputStream);
         App.main(args);
     }
+
+    @Test
+    public void testMain_OneArg() {
+        String args[] = {"1"};
+        App.main(args);
+    }
 }
