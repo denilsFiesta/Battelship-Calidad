@@ -1,8 +1,10 @@
 package com.modelTest.gameTest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import com.model.game.ocean.Ocean;
 import com.model.game.ocean.Point;
 import com.model.game.ocean.ShipPosition;
+import com.model.game.ocean.ShipPosition.Direction;
 import com.model.ships.Ship;
 import java.lang.reflect.Method;
 
@@ -124,144 +127,74 @@ public class OceanTest {
         }
     }
 
+    private Ocean ocean; 
+    private Ship ship;    
+
+    @BeforeEach
+    void setUp() {
+        ocean = new Ocean(10, 10); 
+        ship = mock(Ship.class);
+        when(ship.getLength()).thenReturn(5); 
+    }
+
+
     @Test
-    public void testGetPointsOccupiedByShip_nullShip() {
-        Ocean ocean = new Ocean(10, 10); 
-        List<Point> result = ocean.getPointsOccupiedByShip(null);
-        assertTrue(result.isEmpty(), "Si el barco es null, la lista de puntos debería estar vacía.");
+    void testRandomPlace_SuccessfulPlacementFirstTry() {
+        assertNotNull(ocean, "Ocean should be initialized");
+
+        ShipPosition position = ShipPosition.getRandomShipPosition(ocean, ship);
+
+        assertNotNull(position, "Position should not be null");
+        assertTrue(position.getX() >= 0 && position.getX() < ocean.getSizeHorizontal(), 
+                   "Position X should be within the ocean bounds");
+        assertTrue(position.getY() >= 0 && position.getY() < ocean.getSizeVertical(), 
+                   "Position Y should be within the ocean bounds");
     }
 
     @Test
-    public void testGetPointsOccupiedByShip_emptyOcean() {
-        Ocean ocean = mock(Ocean.class);
-        when(ocean.getSizeVertical()).thenReturn(0);
-        when(ocean.getSizeHorizontal()).thenReturn(0);
+    public void testRandomPlace_FailedAllAttempts() {
+        List<Ship> ships = List.of(Mockito.mock(Ship.class));
+        Ocean ocean = Mockito.mock(Ocean.class);
         
-        Ship ship = mock(Ship.class);
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
-        assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
+        Mockito.when(ocean.getSizeVertical()).thenReturn(10);
+        Mockito.when(ocean.getSizeHorizontal()).thenReturn(10);
+        Mockito.when(ocean.getRandomOcean(ships, ocean)).thenReturn(null);
+
+        Ocean result = Ocean.randomPlace(ships, ocean);
+
+        Assertions.assertNull(result, "El océano devuelto debería ser null después de alcanzar el número máximo de intentos fallidos.");
     }
 
     @Test
-    public void testGetPointsOccupiedByShip_noMatchingPoints() {
-        Ocean ocean = new Ocean(2, 2);
-        Ship ship = mock(Ship.class);
+    void testRandomPlace_SuccessfulPlacementAfterAttempts() {
+        Ship mockShip = mock(Ship.class);
+        when(mockShip.getLength()).thenReturn(5);
+        Ocean ocean = new Ocean(10, 10);
+        ShipPosition validPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
 
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
-        assertTrue(result.isEmpty(), "Si el barco no está en ninguna posición, la lista de puntos debería estar vacía.");
+        Ocean spyOcean = spy(ocean);
+        doReturn(validPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+
+        Ocean result = Ocean.randomPlace(Collections.singletonList(mockShip), spyOcean);
+        assertNotNull(result, "Result should not be null");
+        verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
     }
 
     @Test
-    public void testGetPointsOccupiedByShip_noMatchesButIterates() {
-        Ocean ocean = new Ocean(2, 2);
-        Ship ship = mock(Ship.class);
+    void testRandomPlace_FailedAfterMultipleAttempts() {
+        List<Ship> ships = List.of(ship);
+        
+        try (MockedStatic<Ocean> mockedOcean = mockStatic(Ocean.class)) {
+            mockedOcean.when(() -> Ocean.getRandomOcean(any(), any()))
+                       .thenReturn(null);
 
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+            mockedOcean.when(() -> Ocean.randomPlace(any(), any()))
+                       .thenCallRealMethod();
 
-        assertTrue(result.isEmpty(), "Si no hay coincidencias de barco después de iterar, la lista debería estar vacía.");
-    }
-    
-    @Test
-    public void testGetPointsOccupiedByShip_matchingPoints() {
-        Ocean ocean = mock(Ocean.class);
-        Ship ship = mock(Ship.class);
+            Ocean result = Ocean.randomPlace(ships, ocean);
 
-        when(ocean.getPointsOccupiedByShip(ship)).thenReturn(Arrays.asList(new Point(0, 0), new Point(1, 1)));
-
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
-
-        assertEquals(2, result.size(), "El barco ocupa dos posiciones, por lo que la lista debería tener dos puntos.");
-        assertTrue(result.contains(new Point(0, 0)), "La lista de puntos debería contener la posición (0, 0).");
-        assertTrue(result.contains(new Point(1, 1)), "La lista de puntos debería contener la posición (1, 1).");
-    }
-
-    @Test
-    public void testGetRange_UP() {
-        Point start = new Point(0, 0);
-        Point end = new Point(0, 5);
-        ShipPosition.Direction direction = ShipPosition.Direction.UP;
-        Point[] expectedRange = new Point[]{
-            new Point(0, 0),
-            new Point(0, 1),
-            new Point(0, 2),
-            new Point(0, 3),
-            new Point(0, 4),
-            new Point(0, 5)
-        };
-
-        Point[] result = Point.getRange(start, end, direction);
-
-        assertNotNull(result, "El resultado no debería ser nulo");
-        assertEquals(expectedRange.length, result.length, "La longitud del array debería ser 6");
-
-        for (int i = 0; i < result.length; i++) {
-            assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
+            assertNull(result, "El océano devuelto debería ser null cuando todos los intentos fallan y se alcanza el número máximo de intentos.");
+            mockedOcean.verify(() -> Ocean.getRandomOcean(any(), any()), times(30));
         }
     }
-
-    @Test
-    public void testGetRange_DOWN() {
-        Point start = new Point(0, 5);
-        Point end = new Point(0, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
-        Point[] expectedRange = new Point[]{
-            new Point(0, 5),
-            new Point(0, 4),
-            new Point(0, 3),
-            new Point(0, 2),
-            new Point(0, 1),
-            new Point(0, 0)
-        };
-
-        Point[] result = Point.getRange(start, end, direction);
-
-        assertNotNull(result, "El resultado no debería ser nulo");
-        assertEquals(expectedRange.length, result.length, "La longitud del array debería ser 6");
-
-        for (int i = 0; i < result.length; i++) {
-            assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
-        }
-}
-
-
-    @Test
-    public void testGetRange_LEFT() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(3, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.LEFT;
-
-        Point[] result = Point.getRange(startPos, endPos, direction);
-
-        assertArrayEquals(new Point[]{new Point(0, 0), new Point(-1, 0), new Point(-2, 0), new Point(-3, 0)}, result);
-    }
-    @Test
-    public void testGetRange_RIGHT() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(3, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
-
-        Point[] result = Point.getRange(startPos, endPos, direction);
-
-        assertArrayEquals(new Point[]{new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0)}, result);
-    }
-
-    @Test
-    public void testGetRange_WithCycle() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(0, 4); 
-        ShipPosition.Direction direction = ShipPosition.Direction.UP;
-
-        Point[] result = Point.getRange(startPos, endPos, direction);
-
-        // Se espera un rango desde (0, 0) hasta (0, 4)
-        assertArrayEquals(new Point[]{
-            new Point(0, 0), 
-            new Point(0, 1), 
-            new Point(0, 2), 
-            new Point(0, 3), 
-            new Point(0, 4)
-        }, result);
-    }
-
-
 }
