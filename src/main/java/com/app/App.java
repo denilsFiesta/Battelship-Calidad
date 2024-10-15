@@ -23,7 +23,7 @@ public class App {
                 if (controller.requestForUserInput("", 1, 2) == 1) {
                     controller.startGame();
 
-                } else System.exit(0);
+                } else return;
             } else {
                 // terminal input parameters
                 int[] counters = parse(args);

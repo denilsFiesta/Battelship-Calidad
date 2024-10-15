@@ -53,4 +53,15 @@ public class AppTest {
         System.setIn(customInputStream);
         App.main(args);
     }
+
+    @Test
+    public void testMain_NoArgsAndExitGame() {
+        String args[] = {};
+        List<String> inputs = Arrays.asList(
+            "2\n"
+        );
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        System.setIn(customInputStream);
+        App.main(args);
+    }
 }
