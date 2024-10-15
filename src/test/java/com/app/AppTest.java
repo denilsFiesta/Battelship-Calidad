@@ -39,4 +39,18 @@ public class AppTest {
         System.setIn(customInputStream);
         App.main(args);
     }
+
+    @Test
+    public void testMain_NoArgsAndInitGame() {
+        String args[] = {};
+        List<String> inputs = Arrays.asList(
+            "1\n",
+            "10 10 0 0 0 0 0\n",
+            "1 0 1\n",
+            "0 0\n"
+        );
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        System.setIn(customInputStream);
+        App.main(args);
+    }
 }
