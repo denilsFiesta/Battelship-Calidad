@@ -197,7 +197,7 @@ public class OceanTest {
             mockedOcean.verify(() -> Ocean.getRandomOcean(any(), any()), times(30));
         }
     }
-// 1 getPoint 1 -> 2 -> 3 -> 8 
+
     @Test
     public void testGetPointsOccupiedByShip_emptyOcean() {
         Ocean ocean = mock(Ocean.class);
@@ -209,8 +209,6 @@ public class OceanTest {
         assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
     }
 
-    // 2 getPoint 1 -> 2 -> 3 -> 4 -> 3 -> 8
-
     @Test
     public void testGetPointsOccupiedByShip_noShipInOcean() {
         Ocean ocean = new Ocean(5, 5);
@@ -220,31 +218,60 @@ public class OceanTest {
         assertTrue(result.isEmpty(), "Si no hay barcos en el océano, la lista de puntos debe estar vacía.");
     }
 
-
-// 3 getPoint 1 -> 2 -> 3 -> 4 -> 5 -> 4 -> 3 -> 8
     @Test
-    public void testGetPointsOccupiedByShip_noMatchesButIterates() {
-        Ocean ocean = new Ocean(2, 2);
+    public void testGetPointsOccupiedByShip_singleShipInOcean() {
+        Ocean ocean = new Ocean(3, 3);
         Ship ship = mock(Ship.class);
+        when(ship.getLength()).thenReturn(1); 
+
+        ShipPosition placedPosition = ocean.tryPlaceShip(ship, new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT));
+
+        assertNotNull(placedPosition, "The ship should have been placed successfully");
 
         List<Point> result = ocean.getPointsOccupiedByShip(ship);
 
-        assertTrue(result.isEmpty(), "Si no hay coincidencias de barco después de iterar, la lista debería estar vacía.");
+        assertEquals(1, result.size(), "There should be exactly one point in the list.");
+        assertTrue(result.contains(new Point(0, 0)), "The list should contain the point (0, 0).");
+
+        System.out.println("Ocean content:");
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(ocean.getShipByPosition(new Point(j, i)) != null ? "S " : "- ");
+            }
+            System.out.println();
+        }
     }
-    
-    // 4 getPoint 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 5 -> 4 -> 3 -> 8
-    @Test
-    public void testGetPointsOccupiedByShip_matchingPoints() {
-        Ocean ocean = mock(Ocean.class);
-        Ship ship = mock(Ship.class);
 
-        when(ocean.getPointsOccupiedByShip(ship)).thenReturn(Arrays.asList(new Point(0, 0), new Point(1, 1)));
+    @Test
+    public void testGetPointsOccupiedByShip_multiplePointsInOcean() {
+        Ocean ocean = new Ocean(5, 5);
+        Ship ship = mock(Ship.class);
+        when(ship.getLength()).thenReturn(3);
+
+        ocean.tryPlaceShip(ship, new ShipPosition(new Point(1, 1), ShipPosition.Direction.RIGHT));
 
         List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        
+        assertEquals(3, result.size(), "Debería haber exactamente tres puntos en la lista.");
+        assertTrue(result.contains(new Point(1, 1)), "La lista debería contener el punto (1, 1).");
+        assertTrue(result.contains(new Point(2, 1)), "La lista debería contener el punto (2, 1).");
+        assertTrue(result.contains(new Point(3, 1)), "La lista debería contener el punto (3, 1).");
+    }
 
-        assertEquals(2, result.size(), "El barco ocupa dos posiciones, por lo que la lista debería tener dos puntos.");
-        assertTrue(result.contains(new Point(0, 0)), "La lista de puntos debería contener la posición (0, 0).");
-        assertTrue(result.contains(new Point(1, 1)), "La lista de puntos debería contener la posición (1, 1).");
+    @Test
+    public void testGetPointsOccupiedByShip_shipOccupyingMultipleRows() {
+        Ocean ocean = new Ocean(5, 5);
+        Ship ship = mock(Ship.class);
+        when(ship.getLength()).thenReturn(3);
+
+        ocean.tryPlaceShip(ship, new ShipPosition(new Point(2, 1), ShipPosition.Direction.DOWN));
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        
+        assertEquals(3, result.size(), "Debería haber exactamente tres puntos en la lista.");
+        assertTrue(result.contains(new Point(2, 1)), "La lista debería contener el punto (2, 1).");
+        assertTrue(result.contains(new Point(2, 2)), "La lista debería contener el punto (2, 2).");
+        assertTrue(result.contains(new Point(2, 3)), "La lista debería contener el punto (2, 3).");
     }
 
 //     @Test
