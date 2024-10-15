@@ -317,37 +317,22 @@ public class OceanTest {
             new Point(0, 0)
         }, result);
     }
-//     @Test
-//     public void testGetRange_RIGHT() {
-//         Point startPos = new Point(0, 0);
-//         Point endPos = new Point(3, 0);
-//         ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
 
-//         Point[] result = Point.getRange(startPos, endPos, direction);
+    @Test
+    void testGetRange_RightDirection() {
+        Point startPos = new Point(0, 0);
+        Point endPos = new Point(2, 0);
+        ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
 
-//         assertArrayEquals(new Point[]{new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0)}, result);
-//     }
+        Point[] result = Point.getRange(startPos, endPos, direction);
 
-    // @Test
-    // public void testGetRange_WithCycle() {
-    //     Point startPos = new Point(0, 0);
-    //     Point endPos = new Point(0, 4); 
-    //     ShipPosition.Direction direction = ShipPosition.Direction.UP;
-
-    //     Point[] result = Point.getRange(startPos, endPos, direction);
-
-    //     // Se espera un rango desde (0, 0) hasta (0, -4)
-    //     assertArrayEquals(new Point[]{
-    //         new Point(0, 0), 
-    //         new Point(0, -1), 
-    //         new Point(0, -2), 
-    //         new Point(0, -3), 
-    //         new Point(0, -4)
-    //     }, result);
-    // }
-
-
-
+        assertEquals(3, result.length);
+        assertArrayEquals(new Point[]{
+            new Point(0, 0),
+            new Point(1, 0),
+            new Point(2, 0)
+        }, result);
+    }
 }
 
 
