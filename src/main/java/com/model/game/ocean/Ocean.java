@@ -54,7 +54,7 @@ public class Ocean {
         return null;
     }
 
-    private static Ocean getRandomOcean(List<Ship> ships, Ocean ocean) {
+    public static Ocean getRandomOcean(List<Ship> ships, Ocean ocean) {
         for (Ship ship : ships) {
             ShipPosition pos = ShipPosition.getRandomShipPosition(ocean, ship);
             if (pos == null)
