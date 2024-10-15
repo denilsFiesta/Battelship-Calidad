@@ -197,6 +197,146 @@ public class OceanTest {
             mockedOcean.verify(() -> Ocean.getRandomOcean(any(), any()), times(30));
         }
     }
+// 1 getPoint 1 -> 2 -> 3 -> 8 
+    @Test
+    public void testGetPointsOccupiedByShip_emptyOcean() {
+        Ocean ocean = mock(Ocean.class);
+        when(ocean.getSizeVertical()).thenReturn(0);
+        when(ocean.getSizeHorizontal()).thenReturn(0);
+        
+        Ship ship = mock(Ship.class);
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
+    }
+
+    // 2 getPoint 1 -> 2 -> 3 -> 4 -> 3 -> 8
+
+    @Test
+    public void testGetPointsOccupiedByShip_noShipInOcean() {
+        Ocean ocean = new Ocean(5, 5);
+        Ship ship = mock(Ship.class);  
+        
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+        assertTrue(result.isEmpty(), "Si no hay barcos en el océano, la lista de puntos debe estar vacía.");
+    }
+
+
+// 3 getPoint 1 -> 2 -> 3 -> 4 -> 5 -> 4 -> 3 -> 8
+    @Test
+    public void testGetPointsOccupiedByShip_noMatchesButIterates() {
+        Ocean ocean = new Ocean(2, 2);
+        Ship ship = mock(Ship.class);
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+
+        assertTrue(result.isEmpty(), "Si no hay coincidencias de barco después de iterar, la lista debería estar vacía.");
+    }
+    
+    // 4 getPoint 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 5 -> 4 -> 3 -> 8
+    @Test
+    public void testGetPointsOccupiedByShip_matchingPoints() {
+        Ocean ocean = mock(Ocean.class);
+        Ship ship = mock(Ship.class);
+
+        when(ocean.getPointsOccupiedByShip(ship)).thenReturn(Arrays.asList(new Point(0, 0), new Point(1, 1)));
+
+        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+
+        assertEquals(2, result.size(), "El barco ocupa dos posiciones, por lo que la lista debería tener dos puntos.");
+        assertTrue(result.contains(new Point(0, 0)), "La lista de puntos debería contener la posición (0, 0).");
+        assertTrue(result.contains(new Point(1, 1)), "La lista de puntos debería contener la posición (1, 1).");
+    }
+
+//     @Test
+//     public void testGetRange_UP() {
+//         Point start = new Point(0, 0);
+//         Point end = new Point(0, 5);
+//         ShipPosition.Direction direction = ShipPosition.Direction.UP;
+//         Point[] expectedRange = new Point[]{
+//             new Point(0, 0),
+//             new Point(0, 1),
+//             new Point(0, 2),
+//             new Point(0, 3),
+//             new Point(0, 4),
+//             new Point(0, 5)
+//         };
+
+//         Point[] result = Point.getRange(start, end, direction);
+
+//         assertNotNull(result, "El resultado no debería ser nulo");
+//         assertEquals(expectedRange.length, result.length, "La longitud del array debería ser 6");
+
+//         for (int i = 0; i < result.length; i++) {
+//             assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
+//         }
+//     }
+
+//     @Test
+//     public void testGetRange_DOWN() {
+//         Point start = new Point(0, 5);
+//         Point end = new Point(0, 0);
+//         ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
+//         Point[] expectedRange = new Point[]{
+//             new Point(0, 5),
+//             new Point(0, 4),
+//             new Point(0, 3),
+//             new Point(0, 2),
+//             new Point(0, 1),
+//             new Point(0, 0)
+//         };
+
+//         Point[] result = Point.getRange(start, end, direction);
+
+//         assertNotNull(result, "El resultado no debería ser nulo");
+//         assertEquals(expectedRange.length, result.length, "La longitud del array debería ser 6");
+
+//         for (int i = 0; i < result.length; i++) {
+//             assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
+//         }
+// }
+
+
+//     @Test
+//     public void testGetRange_LEFT() {
+//         Point startPos = new Point(0, 0);
+//         Point endPos = new Point(3, 0);
+//         ShipPosition.Direction direction = ShipPosition.Direction.LEFT;
+
+//         Point[] result = Point.getRange(startPos, endPos, direction);
+
+//         assertArrayEquals(new Point[]{new Point(0, 0), new Point(-1, 0), new Point(-2, 0), new Point(-3, 0)}, result);
+//     }
+//     @Test
+//     public void testGetRange_RIGHT() {
+//         Point startPos = new Point(0, 0);
+//         Point endPos = new Point(3, 0);
+//         ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
+
+//         Point[] result = Point.getRange(startPos, endPos, direction);
+
+//         assertArrayEquals(new Point[]{new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0)}, result);
+//     }
+
+//     @Test
+//     public void testGetRange_WithCycle() {
+//         Point startPos = new Point(0, 0);
+//         Point endPos = new Point(0, 4); 
+//         ShipPosition.Direction direction = ShipPosition.Direction.UP;
+
+//         Point[] result = Point.getRange(startPos, endPos, direction);
+
+//         // Se espera un rango desde (0, 0) hasta (0, -4)
+//         assertArrayEquals(new Point[]{
+//             new Point(0, 0), 
+//             new Point(0, -1), 
+//             new Point(0, -2), 
+//             new Point(0, -3), 
+//             new Point(0, -4)
+//         }, result);
+//     }
+
+
+
 }
 
 
