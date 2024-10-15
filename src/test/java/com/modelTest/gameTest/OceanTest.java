@@ -259,7 +259,6 @@ public class OceanTest {
 
     @Test
     void testGetRange_SinglePoint() {
-        // Path: 1 -> 2 -> 3 -> F
         Point startPos = new Point(0, 0);
         Point endPos = new Point(0, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
@@ -272,7 +271,6 @@ public class OceanTest {
 
     @Test
     void testGetRange_UpDirection() {
-        // Path: 1 -> 2 -> 4 -> 5 -> 9 -> 2 -> 3 -> F
         Point startPos = new Point(0, 0);
         Point endPos = new Point(0, 2);
         ShipPosition.Direction direction = ShipPosition.Direction.UP;
@@ -289,7 +287,6 @@ public class OceanTest {
 
     @Test
     void testGetRange_DownDirection() {
-        // Path: 1 -> 2 -> 4 -> 6 -> 9 -> 2 -> 3 -> F
         Point startPos = new Point(0, 2);
         Point endPos = new Point(0, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
@@ -305,16 +302,21 @@ public class OceanTest {
     }
 
 
-//     @Test
-//     public void testGetRange_LEFT() {
-//         Point startPos = new Point(0, 0);
-//         Point endPos = new Point(3, 0);
-//         ShipPosition.Direction direction = ShipPosition.Direction.LEFT;
+    @Test
+    void testGetRange_LeftDirection() {
+        Point startPos = new Point(2, 0);
+        Point endPos = new Point(0, 0);
+        ShipPosition.Direction direction = ShipPosition.Direction.LEFT;
 
-//         Point[] result = Point.getRange(startPos, endPos, direction);
+        Point[] result = Point.getRange(startPos, endPos, direction);
 
-//         assertArrayEquals(new Point[]{new Point(0, 0), new Point(-1, 0), new Point(-2, 0), new Point(-3, 0)}, result);
-//     }
+        assertEquals(3, result.length);
+        assertArrayEquals(new Point[]{
+            new Point(2, 0),
+            new Point(1, 0),
+            new Point(0, 0)
+        }, result);
+    }
 //     @Test
 //     public void testGetRange_RIGHT() {
 //         Point startPos = new Point(0, 0);
