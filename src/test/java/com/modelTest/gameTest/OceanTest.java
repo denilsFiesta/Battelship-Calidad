@@ -166,25 +166,37 @@ public class OceanTest {
     }
 
     @Test
-void testRandomPlace_SuccessfulPlacementAfterAttempts() {
-    Ship mockShip = mock(Ship.class);
-    when(mockShip.getLength()).thenReturn(5);
+    void testRandomPlace_SuccessfulPlacementAfterAttempts() {
+        Ship mockShip = mock(Ship.class);
+        when(mockShip.getLength()).thenReturn(5);
+        Ocean ocean = new Ocean(10, 10);
+        ShipPosition validPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
 
-    Ocean ocean = new Ocean(10, 10);
+        Ocean spyOcean = spy(ocean);
+        doReturn(validPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
 
-    ShipPosition validPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
+        Ocean result = Ocean.randomPlace(Collections.singletonList(mockShip), spyOcean);
+        assertNotNull(result, "Result should not be null");
+        verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+    }
 
-    Ocean spyOcean = spy(ocean);
+    @Test
+    void testRandomPlace_FailedAfterMultipleAttempts() {
+        List<Ship> ships = List.of(ship);
+        
+        try (MockedStatic<Ocean> mockedOcean = mockStatic(Ocean.class)) {
+            mockedOcean.when(() -> Ocean.getRandomOcean(any(), any()))
+                       .thenReturn(null);
 
-    doReturn(validPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+            mockedOcean.when(() -> Ocean.randomPlace(any(), any()))
+                       .thenCallRealMethod();
 
-    Ocean result = Ocean.randomPlace(Collections.singletonList(mockShip), spyOcean);
+            Ocean result = Ocean.randomPlace(ships, ocean);
 
-    assertNotNull(result, "Result should not be null");
-
-    verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
-}
-
+            assertNull(result, "El océano devuelto debería ser null cuando todos los intentos fallan y se alcanza el número máximo de intentos.");
+            mockedOcean.verify(() -> Ocean.getRandomOcean(any(), any()), times(30));
+        }
+    }
 }
 
 
