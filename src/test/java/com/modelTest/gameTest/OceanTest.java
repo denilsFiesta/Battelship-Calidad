@@ -30,23 +30,26 @@ public class OceanTest {
 
     @Test
     public void testOceanCreation_invalidHorizontalAndVerticalSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Ocean(0, 0);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Ocean(0, 0),
+                "Debería lanzar IllegalArgumentException para tamaño 0x0");
+        assertThrows(IllegalArgumentException.class, () -> new Ocean(31, 31),
+                "Debería lanzar IllegalArgumentException para tamaño 31x31");
     }
 
     @Test
     public void testOceanCreation_invalidHorizontalSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Ocean(31, 10); 
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Ocean(0, 10),
+                "Debería lanzar IllegalArgumentException para tamaño horizontal 0");
+        assertThrows(IllegalArgumentException.class, () -> new Ocean(31, 10),
+                "Debería lanzar IllegalArgumentException para tamaño horizontal 31");
     }
 
     @Test
     public void testOceanCreation_invalidVerticalSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Ocean(10, 31); 
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Ocean(10, 0),
+                "Debería lanzar IllegalArgumentException para tamaño vertical 0");
+        assertThrows(IllegalArgumentException.class, () -> new Ocean(10, 31),
+                "Debería lanzar IllegalArgumentException para tamaño vertical 31");
     }
 
     @Test
@@ -60,7 +63,15 @@ public class OceanTest {
 
     @Test
     public void testOceanCreation_validSize() {
-        Ocean ocean = new Ocean(10, 10);
+        Ocean ocean = new Ocean(1, 1);
+        assertEquals(1, ocean.getSizeHorizontal(), "El tamaño horizontal mínimo debe ser 1");
+        assertEquals(1, ocean.getSizeVertical(), "El tamaño vertical mínimo debe ser 1");
+
+        ocean = new Ocean(30, 30);
+        assertEquals(30, ocean.getSizeHorizontal(), "El tamaño horizontal máximo debe ser 30");
+        assertEquals(30, ocean.getSizeVertical(), "El tamaño vertical máximo debe ser 30");
+
+        ocean = new Ocean(10, 10);
         assertEquals(10, ocean.getSizeHorizontal(), "El tamaño horizontal debe ser 10");
         assertEquals(10, ocean.getSizeVertical(), "El tamaño vertical debe ser 10");
     }
@@ -103,7 +114,6 @@ public class OceanTest {
 
         for (int y = 0; y < ocean.getSizeVertical(); y++) {
             for (int x = 0; x < ocean.getSizeHorizontal(); x++) {
-                // Probar cada dirección válida
                 for (ShipPosition.Direction direction : ShipPosition.Direction.values()) {
                     ShipPosition position = new ShipPosition(new Point(x, y), direction);
                     ShipPosition result = ocean.tryPlaceShip(ship, position);
@@ -193,12 +203,17 @@ public class OceanTest {
     }
 
     @Test
-    public void testGetPointsOccupiedByShip_noShipInOcean() {
+    public void testGetPointsOccupiedByShip_noShipAndNullShip() {
         Ocean ocean = new Ocean(5, 5);
-        Ship ship = mock(Ship.class);  
         
+        // Prueba con barco mock (sin colocar en el océano)
+        Ship ship = mock(Ship.class);
         List<Point> result = ocean.getPointsOccupiedByShip(ship);
         assertTrue(result.isEmpty(), "Si no hay barcos en el océano, la lista de puntos debe estar vacía.");
+        
+        // Prueba con barco nulo
+        result = ocean.getPointsOccupiedByShip(null);
+        assertTrue(result.isEmpty(), "Si el barco es null, la lista de puntos debería estar vacía.");
     }
 
     @Test
