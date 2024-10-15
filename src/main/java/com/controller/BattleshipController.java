@@ -204,6 +204,7 @@ public class BattleshipController {
     /**
      * Execute all user input commands.
      */
+
     public void executeCommands() {
         try {
             scanner.nextLine();
