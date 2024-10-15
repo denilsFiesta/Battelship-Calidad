@@ -11,7 +11,7 @@ public class App {
     public static void main(String[] args) {
         if (args.length != 0 && args.length != 7) {
             System.out.println(ARGS_TERMINAL_ERROR);
-            System.exit(0);
+            return;
         }
         try {
             // create controller
