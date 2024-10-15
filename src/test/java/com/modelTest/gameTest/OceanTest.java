@@ -148,6 +148,21 @@ public class OceanTest {
                    "Position Y should be within the ocean bounds");
     }
 
+    @Test
+    public void testRandomPlace_FailedAllAttempts() {
+        List<Ship> ships = List.of(Mockito.mock(Ship.class));
+        Ocean ocean = Mockito.mock(Ocean.class);
+        
+        Mockito.when(ocean.getSizeVertical()).thenReturn(10);
+        Mockito.when(ocean.getSizeHorizontal()).thenReturn(10);
+        Mockito.when(ocean.getRandomOcean(ships, ocean)).thenReturn(null);
+
+        Ocean result = Ocean.randomPlace(ships, ocean);
+
+        Assertions.assertNull(result, "El océano devuelto debería ser null después de alcanzar el número máximo de intentos fallidos.");
+    }
+
+
 }
 
 
