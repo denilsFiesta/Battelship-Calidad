@@ -70,4 +70,22 @@ public class AppTest {
         String args[] = {"1"};
         App.main(args);
     }
+
+    @Test
+    public void testMain_LetterArg() {
+        String args[] = {"10", "10", "nose", "5", "5", "5", "5"};
+        App.main(args);
+    }
+
+    @Test
+    public void testMain_LargeArg() {
+        String args[] = {};
+        List<String> inputs = Arrays.asList(
+            "1\n",
+            "10 10 0 0 0 0\n"
+        );
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        System.setIn(customInputStream);
+        App.main(args);
+    }
 }
