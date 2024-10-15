@@ -1,7 +1,10 @@
 package com.modelTest.gameTest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+
+import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,6 +165,25 @@ public class OceanTest {
         Assertions.assertNull(result, "El océano devuelto debería ser null después de alcanzar el número máximo de intentos fallidos.");
     }
 
+    @Test
+void testRandomPlace_SuccessfulPlacementAfterAttempts() {
+    Ship mockShip = mock(Ship.class);
+    when(mockShip.getLength()).thenReturn(5);
+
+    Ocean ocean = new Ocean(10, 10);
+
+    ShipPosition validPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
+
+    Ocean spyOcean = spy(ocean);
+
+    doReturn(validPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+
+    Ocean result = Ocean.randomPlace(Collections.singletonList(mockShip), spyOcean);
+
+    assertNotNull(result, "Result should not be null");
+
+    verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+}
 
 }
 
