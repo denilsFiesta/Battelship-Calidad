@@ -274,19 +274,18 @@ public class OceanTest {
         assertTrue(result.contains(new Point(2, 3)), "La lista debería contener el punto (2, 3).");
     }
 
-//     @Test
-//     public void testGetRange_UP() {
-//         Point start = new Point(0, 0);
-//         Point end = new Point(0, 5);
-//         ShipPosition.Direction direction = ShipPosition.Direction.UP;
-//         Point[] expectedRange = new Point[]{
-//             new Point(0, 0),
-//             new Point(0, 1),
-//             new Point(0, 2),
-//             new Point(0, 3),
-//             new Point(0, 4),
-//             new Point(0, 5)
-//         };
+    @Test
+    void testGetRange_SinglePoint() {
+        // Path: 1 -> 2 -> 3 -> F
+        Point startPos = new Point(0, 0);
+        Point endPos = new Point(0, 0);
+        ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
+
+        Point[] result = Point.getRange(startPos, endPos, direction);
+
+        assertEquals(1, result.length);
+        assertEquals(new Point(0, 0), result[0]);
+    }
 
 //         Point[] result = Point.getRange(start, end, direction);
 
@@ -344,23 +343,23 @@ public class OceanTest {
 //         assertArrayEquals(new Point[]{new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0)}, result);
 //     }
 
-//     @Test
-//     public void testGetRange_WithCycle() {
-//         Point startPos = new Point(0, 0);
-//         Point endPos = new Point(0, 4); 
-//         ShipPosition.Direction direction = ShipPosition.Direction.UP;
+    // @Test
+    // public void testGetRange_WithCycle() {
+    //     Point startPos = new Point(0, 0);
+    //     Point endPos = new Point(0, 4); 
+    //     ShipPosition.Direction direction = ShipPosition.Direction.UP;
 
-//         Point[] result = Point.getRange(startPos, endPos, direction);
+    //     Point[] result = Point.getRange(startPos, endPos, direction);
 
-//         // Se espera un rango desde (0, 0) hasta (0, -4)
-//         assertArrayEquals(new Point[]{
-//             new Point(0, 0), 
-//             new Point(0, -1), 
-//             new Point(0, -2), 
-//             new Point(0, -3), 
-//             new Point(0, -4)
-//         }, result);
-//     }
+    //     // Se espera un rango desde (0, 0) hasta (0, -4)
+    //     assertArrayEquals(new Point[]{
+    //         new Point(0, 0), 
+    //         new Point(0, -1), 
+    //         new Point(0, -2), 
+    //         new Point(0, -3), 
+    //         new Point(0, -4)
+    //     }, result);
+    // }
 
 
 
