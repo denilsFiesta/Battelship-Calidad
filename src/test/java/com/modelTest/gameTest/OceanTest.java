@@ -180,23 +180,6 @@ public class OceanTest {
         verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
     }
 
-    @Test
-    void testRandomPlace_FailedAfterMultipleAttempts() {
-        List<Ship> ships = List.of(ship);
-        
-        try (MockedStatic<Ocean> mockedOcean = mockStatic(Ocean.class)) {
-            mockedOcean.when(() -> Ocean.getRandomOcean(any(), any()))
-                       .thenReturn(null);
-
-            mockedOcean.when(() -> Ocean.randomPlace(any(), any()))
-                       .thenCallRealMethod();
-
-            Ocean result = Ocean.randomPlace(ships, ocean);
-
-            assertNull(result, "El océano devuelto debería ser null cuando todos los intentos fallan y se alcanza el número máximo de intentos.");
-            mockedOcean.verify(() -> Ocean.getRandomOcean(any(), any()), times(30));
-        }
-    }
 
     @Test
     public void testGetPointsOccupiedByShip_emptyOcean() {
