@@ -270,15 +270,22 @@ public class OceanTest {
         assertEquals(new Point(0, 0), result[0]);
     }
 
-//         Point[] result = Point.getRange(start, end, direction);
+    @Test
+    void testGetRange_UpDirection() {
+        // Path: 1 -> 2 -> 4 -> 5 -> 9 -> 2 -> 3 -> F
+        Point startPos = new Point(0, 0);
+        Point endPos = new Point(0, 2);
+        ShipPosition.Direction direction = ShipPosition.Direction.UP;
 
-//         assertNotNull(result, "El resultado no debería ser nulo");
-//         assertEquals(expectedRange.length, result.length, "La longitud del array debería ser 6");
+        Point[] result = Point.getRange(startPos, endPos, direction);
 
-//         for (int i = 0; i < result.length; i++) {
-//             assertEquals(expectedRange[i], result[i], "El punto en la posición " + i + " no es correcto");
-//         }
-//     }
+        assertEquals(3, result.length);
+        assertArrayEquals(new Point[]{
+            new Point(0, 0),
+            new Point(0, 1),
+            new Point(0, 2)
+        }, result);
+    }
 
 //     @Test
 //     public void testGetRange_DOWN() {
