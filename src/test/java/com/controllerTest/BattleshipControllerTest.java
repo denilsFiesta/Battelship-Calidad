@@ -115,4 +115,20 @@ public class BattleshipControllerTest {
         battleshipController.startGame(args);
         battleshipController.executeCommands();
     }
+
+    @Test
+    public void testExecuteCommands_NoInput(){
+        int args[] = {10, 10, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "1 0 1\n"
+        );
+        
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        System.setIn(customInputStream);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
 }
