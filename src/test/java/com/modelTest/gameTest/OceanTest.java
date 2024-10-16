@@ -412,6 +412,15 @@ public class OceanTest {
         assertTrue(resultEmptyPosition, "Una posición sin barco dentro del océano debería estar vacía");
     }
 
+    @Test
+    void testHashCode() {
+        Point point1 = new Point(1, 2);
+        Point point2 = new Point(1, 2);
+        Point point3 = new Point(2, 1);
+        
+        assertEquals(point1.hashCode(), point2.hashCode(), "Puntos iguales deben tener el mismo hashCode");
+        assertNotEquals(point1.hashCode(), point3.hashCode(), "Puntos diferentes deben tener hashCodes diferentes");
+    }
     
     
 }
