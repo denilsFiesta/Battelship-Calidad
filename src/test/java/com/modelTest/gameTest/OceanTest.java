@@ -319,9 +319,7 @@ public class OceanTest {
         Point startPos = new Point(0, 0);
         Point endPos = new Point(0, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
-
         Point[] result = Point.getRange(startPos, endPos, direction);
-
         assertEquals(1, result.length);
         assertEquals(new Point(0, 0), result[0]);
     }
@@ -329,67 +327,55 @@ public class OceanTest {
     @Test
     void testGetRange_UpDirection() {
         Point startPos = new Point(0, 0);
-        Point endPos = new Point(0, 2);
+        Point endPos = new Point(0, 3);
         ShipPosition.Direction direction = ShipPosition.Direction.UP;
-
         Point[] result = Point.getRange(startPos, endPos, direction);
-
-        assertEquals(3, result.length);
-        assertArrayEquals(new Point[]{
-            new Point(0, 0),
-            new Point(0, 1),
-            new Point(0, 2)
-        }, result);
+        assertEquals(4, result.length);
+        assertEquals(new Point(0, 0), result[0]);
+        assertEquals(new Point(0, 1), result[1]);
+        assertEquals(new Point(0, 2), result[2]);
+        assertEquals(new Point(0, 3), result[3]);
     }
 
     @Test
     void testGetRange_DownDirection() {
-        Point startPos = new Point(0, 2);
+        Point startPos = new Point(0, 3);
         Point endPos = new Point(0, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
-
         Point[] result = Point.getRange(startPos, endPos, direction);
-
-        assertEquals(3, result.length);
-        assertArrayEquals(new Point[]{
-            new Point(0, 2),
-            new Point(0, 1),
-            new Point(0, 0)
-        }, result);
+        assertEquals(4, result.length);
+        assertEquals(new Point(0, 3), result[0]);
+        assertEquals(new Point(0, 2), result[1]);
+        assertEquals(new Point(0, 1), result[2]);
+        assertEquals(new Point(0, 0), result[3]);
     }
 
     @Test
     void testGetRange_LeftDirection() {
-        Point startPos = new Point(2, 0);
+        Point startPos = new Point(3, 0);
         Point endPos = new Point(0, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.LEFT;
-
         Point[] result = Point.getRange(startPos, endPos, direction);
-
-        assertEquals(3, result.length);
-        assertArrayEquals(new Point[]{
-            new Point(2, 0),
-            new Point(1, 0),
-            new Point(0, 0)
-        }, result);
+        assertEquals(4, result.length);
+        assertEquals(new Point(3, 0), result[0]);
+        assertEquals(new Point(2, 0), result[1]);
+        assertEquals(new Point(1, 0), result[2]);
+        assertEquals(new Point(0, 0), result[3]);
     }
 
     @Test
     void testGetRange_RightDirection() {
         Point startPos = new Point(0, 0);
-        Point endPos = new Point(2, 0);
+        Point endPos = new Point(3, 0);
         ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
-
         Point[] result = Point.getRange(startPos, endPos, direction);
-
-        assertEquals(3, result.length);
-        assertArrayEquals(new Point[]{
-            new Point(0, 0),
-            new Point(1, 0),
-            new Point(2, 0)
-        }, result);
+        assertEquals(4, result.length);
+        assertEquals(new Point(0, 0), result[0]);
+        assertEquals(new Point(1, 0), result[1]);
+        assertEquals(new Point(2, 0), result[2]);
+        assertEquals(new Point(3, 0), result[3]);
     }
-
+    
     @Test
     void testIsEmpty_PathWithShip() {
         Point positionWithShip = new Point(5, 5);
