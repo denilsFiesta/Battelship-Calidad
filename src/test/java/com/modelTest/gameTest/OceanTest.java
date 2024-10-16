@@ -22,6 +22,7 @@ import com.model.game.ocean.Ocean;
 import com.model.game.ocean.Point;
 import com.model.game.ocean.ShipPosition;
 import com.model.game.ocean.ShipPosition.Direction;
+import com.model.ships.Destroyer;
 import com.model.ships.Ship;
 import java.lang.reflect.Method;
 
@@ -88,20 +89,16 @@ public class OceanTest {
 
     @Test
     public void testPlaceShipUnsuccessfully() {
+        Ocean ocean = new Ocean(5, 5);  // Usa una instancia real, no un mock
         Ship ship = Mockito.mock(Ship.class);
-        Ocean ocean = Mockito.mock(Ocean.class);
-        ShipPosition mockPosition = Mockito.mock(ShipPosition.class);
-        Mockito.when(ocean.tryPlaceShip(Mockito.any(Ship.class), Mockito.any(ShipPosition.class)))
-               .thenReturn(null);
-        
+        when(ship.getLength()).thenReturn(3);
 
-        ShipPosition result = ocean.tryPlaceShip(ship, mockPosition);
-        
-        Mockito.verify(ocean).tryPlaceShip(ship, mockPosition);
-        
-        Assertions.assertNull(result, "No debería haber espacio para colocar el barco en el océano.");
+        ShipPosition result = ocean.tryPlaceShip(ship, new ShipPosition(new Point(-1, 0), ShipPosition.Direction.RIGHT));
+        Assertions.assertNull(result, "No debería ser posible colocar el barco fuera del océano.");
+
+        result = ocean.tryPlaceShip(ship, new ShipPosition(new Point(3, 0), ShipPosition.Direction.RIGHT));
+        Assertions.assertNull(result, "No debería ser posible colocar el barco si se extiende fuera del océano.");
     }
-
 
     @Test
     public void testPlaceShipAfterMaxAttempts() {
@@ -133,6 +130,9 @@ public class OceanTest {
             for (int x = 0; x < ocean.getSizeHorizontal(); x++) {
                 Assertions.assertTrue(ocean.isEmpty(new Point(x, y)),
                     "El océano debería estar vacío en la posición (" + x + ", " + y + ")");
+
+                    // Assertions.assertNull(ocean.getShipByPosition(point),
+                    // "No debería haber barco en la posición (" + x + ", " + y + ")");
             }
         }
     }
@@ -254,6 +254,7 @@ public class OceanTest {
         assertTrue(result.contains(new Point(1, 1)), "La lista debería contener el punto (1, 1).");
         assertTrue(result.contains(new Point(2, 1)), "La lista debería contener el punto (2, 1).");
         assertTrue(result.contains(new Point(3, 1)), "La lista debería contener el punto (3, 1).");
+        
     }
 
     @Test
@@ -271,6 +272,45 @@ public class OceanTest {
         assertTrue(result.contains(new Point(2, 2)), "La lista debería contener el punto (2, 2).");
         assertTrue(result.contains(new Point(2, 3)), "La lista debería contener el punto (2, 3).");
     }
+
+    // @Test
+    // void testIsEmpty_PositionOutOfOcean() {
+    //     Point pos = new Point(-1, -1); // Posición fuera de los límites del océano
+    //     Ocean ocean = new Ocean(10, 10); // Asegúrate de usar un tamaño válido
+
+    //     boolean result = ocean.isEmpty(pos);
+
+    //     assertTrue(result, "La posición está fuera del océano, por lo que debería ser considerada vacía.");
+    // }
+
+    @Test
+    void testIsEmpty_PositionWithShip() {
+        Point pos = new Point(0, 0); // Posición dentro de los límites del océano
+        Ocean ocean = mock(Ocean.class); // Crear un mock de Ocean
+        //Ship ship = new Ship(); // Ajusta según los parámetros que necesite Ship
+
+        // Configurar el comportamiento del mock
+        when(ocean.isEmpty(pos)).thenReturn(false); // Simulamos que la posición tiene un barco
+
+        boolean result = ocean.isEmpty(pos);
+
+        assertFalse(result, "La posición contiene un barco, por lo que no debería ser considerada vacía.");
+    }
+
+    @Test
+    void testIsEmpty_EmptyPosition() {
+        // Preparación
+        Point emptyPosition = new Point(3, 3);
+
+        // Ejecución
+        boolean result = ocean.isEmpty(emptyPosition);
+
+        // Verificación
+        assertTrue(result, "Una posición sin barco debería estar vacía");
+    }
+
+
+    //Point
 
     @Test
     void testGetRange_SinglePoint() {
@@ -316,7 +356,6 @@ public class OceanTest {
         }, result);
     }
 
-
     @Test
     void testGetRange_LeftDirection() {
         Point startPos = new Point(2, 0);
@@ -348,6 +387,33 @@ public class OceanTest {
             new Point(2, 0)
         }, result);
     }
+
+    @Test
+    void testIsEmpty_PathWithShip() {
+        Point positionWithShip = new Point(5, 5);
+        Ship ship = new Destroyer(); 
+        ShipPosition shipPosition = new ShipPosition(positionWithShip, ShipPosition.Direction.RIGHT);
+
+        ShipPosition placedPosition = ocean.tryPlaceShip(ship, shipPosition);
+        assertNotNull(placedPosition, "El barco debería haberse colocado correctamente");
+
+        boolean result = ocean.isEmpty(positionWithShip);
+        assertFalse(result, "La posición con un barco no debería estar vacía");
+    }
+
+    @Test
+    void testIsEmpty_PathWithoutShip() {
+        Point positionOutOfOcean = new Point(11, 11);
+        boolean resultOutOfOcean = ocean.isEmpty(positionOutOfOcean);
+        assertTrue(resultOutOfOcean, "Una posición fuera del océano debería considerarse vacía");
+
+        Point emptyPosition = new Point(3, 3);
+        boolean resultEmptyPosition = ocean.isEmpty(emptyPosition);
+        assertTrue(resultEmptyPosition, "Una posición sin barco dentro del océano debería estar vacía");
+    }
+
+    
+    
 }
 
 

@@ -98,7 +98,7 @@ public class Ocean {
         };
     }
 
-    private boolean indexOutOfOcean(Point pos) {
+    public boolean indexOutOfOcean(Point pos) {
         return (pos.y() < 0 || pos.y() >= sizeVertical) || (pos.x() < 0 || pos.x() >= sizeHorizontal);
     }
 
