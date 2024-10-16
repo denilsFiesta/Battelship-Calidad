@@ -412,6 +412,41 @@ public class OceanTest {
         assertTrue(resultEmptyPosition, "Una posición sin barco dentro del océano debería estar vacía");
     }
 
+    @Test
+    void testHashCode() {
+        Point point1 = new Point(1, 2);
+        Point point2 = new Point(1, 2);
+        Point point3 = new Point(2, 1);
+
+        assertEquals(point1.hashCode(), point2.hashCode(), "Puntos iguales deben tener el mismo hashCode");
+        assertNotEquals(point1.hashCode(), point3.hashCode(), "Puntos diferentes deben tener hashCodes diferentes");
+    }
+
+    @Test
+    void testEquals_SameObject() {
+        // Camino 1 -> 2 -> 3 -> 4 -> 6 -> 7
+        Point point = new Point(1, 2);
+        assertTrue(point.equals(point), "Un punto debe ser igual a sí mismo");
+    }
+
+    @Test
+    void testEquals_NullOrDifferentClass() {
+        // Camino 1 -> 2 -> 4 -> 6 -> 7
+        Point point = new Point(1, 2);
+        assertFalse(point.equals(null), "Un punto no debe ser igual a null");
+        assertFalse(point.equals("Not a Point"), "Un punto no debe ser igual a un objeto de otra clase");
+    }
+
+    @Test
+    void testEquals_DifferentPoint() {
+        // Camino 1 -> 2 -> 4 -> 5 -> 6 -> 7
+        Point point1 = new Point(1, 2);
+        Point point2 = new Point(1, 2);
+        Point point3 = new Point(2, 1);
+        
+        assertTrue(point1.equals(point2), "Puntos con las mismas coordenadas deben ser iguales");
+        assertFalse(point1.equals(point3), "Puntos con coordenadas diferentes no deben ser iguales");
+    }
     
     
 }
