@@ -102,7 +102,7 @@ public class Ocean {
         return (pos.y() < 0 || pos.y() >= sizeVertical) || (pos.x() < 0 || pos.x() >= sizeHorizontal);
     }
 
-    private boolean badIndexRange(Point startPos, Point endPos, ShipPosition.Direction direction) {
+    public boolean badIndexRange(Point startPos, Point endPos, ShipPosition.Direction direction) {
         if (indexOutOfOcean(startPos) || indexOutOfOcean(endPos)) return true;
 
         Point[] positionRange = Point.getRange(startPos, endPos, direction);
