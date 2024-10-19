@@ -33,7 +33,7 @@ public class BattleshipTest {
 
     @Test
     public void testToString() {
-        // Verificamos que el método toString retorne el nombre correcto del barco
+        
         assertEquals("Battleship", battleship.toString(), "El nombre del barco debería ser 'Battleship'");
     }
 }

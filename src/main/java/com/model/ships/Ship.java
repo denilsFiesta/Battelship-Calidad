@@ -1,10 +1,10 @@
 package com.model.ships;
 
-import com.model.game.FiringMode;
-import com.model.game.HealthReport;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.model.game.FiringMode;
+import com.model.game.HealthReport;
 
 public abstract class Ship {
     protected int health;
