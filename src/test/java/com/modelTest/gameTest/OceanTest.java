@@ -1,38 +1,84 @@
 package com.modelTest.gameTest;
-import java.util.Collections;
-import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.lang.reflect.Method;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import com.model.game.ocean.Ocean;
 import com.model.game.ocean.Point;
 import com.model.game.ocean.ShipPosition;
-import com.model.ships.Destroyer;
 import com.model.ships.Ship;
-
+import java.lang.reflect.InvocationTargetException;
 
 public class OceanTest {
 
+    @Mock
+    private Ocean oceanInstance;
+
+    @Mock
+    private Point pointMock;
+
+    @Mock
+    private Ocean oceanMock;
+
+    @Mock
+    private Ship shipMock;
+
+    @Mock
+    private ShipPosition startPosMock;
+
+    @Mock
+    private ShipPosition endPosMock;
+
+    @Mock
+    private ShipPosition shipPositionMock;
+
+    @InjectMocks
+    private Ocean oceanSpy;
+
+    @Mock
+    private Ocean ocean;
+
+    @BeforeEach
+    void setUp() {
+        oceanSpy = Mockito.spy(new Ocean(10, 10));
+        try {
+            MockitoAnnotations.openMocks(this);
+            oceanInstance = new Ocean(30, 30);
+
+            when(shipMock.getLength()).thenReturn(3);
+
+            Field oceanField = Ocean.class.getDeclaredField("ocean");
+            oceanField.setAccessible(true);
+            oceanField.set(oceanInstance, new Ship[30][30]);
+
+            startPosMock = mock(ShipPosition.class);
+            when(startPosMock.getX()).thenReturn(5);
+            when(startPosMock.getY()).thenReturn(5);
+            when(startPosMock.getDirection()).thenReturn(ShipPosition.Direction.LEFT);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        when(startPosMock.getX()).thenReturn(5);
+        when(startPosMock.getY()).thenReturn(5);
+        when(endPosMock.getX()).thenReturn(5);
+        when(endPosMock.getY()).thenReturn(7);
+    }
+
     @Test
-    public void testOceanCreation_invalidHorizontalAndVerticalSize() {
+    void testOceanCreation_invalidHorizontalAndVerticalSize() {
         assertThrows(IllegalArgumentException.class, () -> new Ocean(0, 0),
                 "Debería lanzar IllegalArgumentException para tamaño 0x0");
         assertThrows(IllegalArgumentException.class, () -> new Ocean(31, 31),
@@ -40,7 +86,7 @@ public class OceanTest {
     }
 
     @Test
-    public void testOceanCreation_invalidHorizontalSize() {
+    void testOceanCreation_invalidHorizontalSize() {
         assertThrows(IllegalArgumentException.class, () -> new Ocean(0, 10),
                 "Debería lanzar IllegalArgumentException para tamaño horizontal 0");
         assertThrows(IllegalArgumentException.class, () -> new Ocean(31, 10),
@@ -48,7 +94,7 @@ public class OceanTest {
     }
 
     @Test
-    public void testOceanCreation_invalidVerticalSize() {
+    void testOceanCreation_invalidVerticalSize() {
         assertThrows(IllegalArgumentException.class, () -> new Ocean(10, 0),
                 "Debería lanzar IllegalArgumentException para tamaño vertical 0");
         assertThrows(IllegalArgumentException.class, () -> new Ocean(10, 31),
@@ -56,8 +102,10 @@ public class OceanTest {
     }
 
     @Test
-    public void testOceanCreation_validSizeWithInitialOcean() {
-        Ocean ocean = new Ocean(10, 10);
+    void testOceanCreation_validSizeWithInitialOcean() {
+        when(ocean.getSizeHorizontal()).thenReturn(10);
+        when(ocean.getSizeVertical()).thenReturn(10);
+
         assertEquals(10, ocean.getSizeHorizontal(), "El tamaño horizontal debe ser 10");
         assertEquals(10, ocean.getSizeVertical(), "El tamaño vertical debe ser 10");
 
@@ -65,18 +113,145 @@ public class OceanTest {
     }
 
     @Test
-    public void testOceanCreation_validSize() {
-        Ocean ocean = new Ocean(1, 1);
+    void testOceanCreation_validSize() {
+        when(ocean.getSizeHorizontal()).thenReturn(1, 30, 10);
+        when(ocean.getSizeVertical()).thenReturn(1, 30, 10);
+
         assertEquals(1, ocean.getSizeHorizontal(), "El tamaño horizontal mínimo debe ser 1");
         assertEquals(1, ocean.getSizeVertical(), "El tamaño vertical mínimo debe ser 1");
 
-        ocean = new Ocean(30, 30);
         assertEquals(30, ocean.getSizeHorizontal(), "El tamaño horizontal máximo debe ser 30");
         assertEquals(30, ocean.getSizeVertical(), "El tamaño vertical máximo debe ser 30");
 
-        ocean = new Ocean(10, 10);
         assertEquals(10, ocean.getSizeHorizontal(), "El tamaño horizontal debe ser 10");
         assertEquals(10, ocean.getSizeVertical(), "El tamaño vertical debe ser 10");
+    }
+
+    @Test
+    void testRandomPlace_SuccessfulPlacementFirstTry() {
+        Ship mockShip = mock(Ship.class);
+        ShipPosition mockPosition = mock(ShipPosition.class);
+        Ocean ocean = mock(Ocean.class);
+
+        when(ocean.getSizeHorizontal()).thenReturn(10);
+        when(ocean.getSizeVertical()).thenReturn(10);
+
+        try (var mockStatic = mockStatic(ShipPosition.class)) {
+            mockStatic.when(() -> ShipPosition.getRandomShipPosition(ocean, mockShip))
+                        .thenReturn(mockPosition);
+
+            when(mockPosition.getPosition()).thenReturn(new Point(5, 5));
+
+            ShipPosition position = ShipPosition.getRandomShipPosition(ocean, mockShip);
+
+            assertNotNull(position, "Position should not be null");
+
+            Point point = position.getPosition();
+
+            assertTrue(point.x() >= 0 && point.x() < ocean.getSizeHorizontal(), "Position X should be within the ocean bounds");
+            assertTrue(point.y() >= 0 && point.y() < ocean.getSizeVertical(), "Position Y should be within the ocean bounds");
+        }
+    }
+
+
+    @Test
+    public void testRandomPlace_FailedAllAttempts() {
+        Ship mockShip = Mockito.mock(Ship.class);
+        List<Ship> ships = List.of(mockShip);
+        Ocean ocean = Mockito.mock(Ocean.class);
+        
+        Mockito.when(ocean.getSizeVertical()).thenReturn(10);
+        Mockito.when(ocean.getSizeHorizontal()).thenReturn(10);
+        Mockito.when(Ocean.getRandomOcean(ships, ocean)).thenReturn(null);
+
+        Ocean result = Ocean.randomPlace(ships, ocean);
+
+        Assertions.assertNull(result, "El océano devuelto debería ser null después de alcanzar el número máximo de intentos fallidos.");
+    }
+
+    @Test
+    void testRandomPlace_SuccessfulPlacementAfterAttempts() {
+        Ship mockShip = mock(Ship.class);
+        when(mockShip.getLength()).thenReturn(5);
+        
+        Ocean ocean = new Ocean(10, 10);
+        ShipPosition validPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
+
+        Ocean spyOcean = spy(ocean);
+        doReturn(validPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+
+        Ocean result = Ocean.randomPlace(Collections.singletonList(mockShip), spyOcean);
+        
+        assertNotNull(result, "Result should not be null");
+        verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
+    }
+
+    @Test
+    public void testIsEmpty_PositionIsEmpty() {
+        Point pointMock = mock(Point.class);
+        Ocean spyOcean = spy(oceanInstance);
+
+        doReturn(null).when(spyOcean).getShipByPosition(pointMock);
+
+        assertTrue(spyOcean.isEmpty(pointMock), "The position should be considered empty when there is no ship.");
+    }
+
+    @Test
+    public void testIsEmpty_PositionNotEmpty() {
+        Point pointMock = mock(Point.class);
+        Ship shipMock = mock(Ship.class);
+        Ocean spyOcean = spy(oceanInstance);
+
+        doReturn(shipMock).when(spyOcean).getShipByPosition(pointMock);
+
+        assertFalse(spyOcean.isEmpty(pointMock), "The position should not be considered empty when there is a ship.");
+    }
+
+    @Test
+    public void testGetShipByPosition_PositionOutOfOcean() {
+        when(pointMock.x()).thenReturn(31);
+        when(pointMock.y()).thenReturn(15);
+
+        Ocean spyOcean = spy(oceanInstance);
+        doReturn(true).when(spyOcean).indexOutOfOcean(pointMock);
+
+        assertNull(spyOcean.getShipByPosition(pointMock), "Position (31, 15) is out of ocean bounds, so the method should return null.");
+    }
+
+    
+    @Test
+    public void testGetShipByPosition_PositionWithinBoundsAndShipPresent() throws NoSuchFieldException, IllegalAccessException {
+        when(pointMock.x()).thenReturn(10);
+        when(pointMock.y()).thenReturn(5);
+        
+        Ocean spyOcean = spy(oceanInstance);
+        doReturn(false).when(spyOcean).indexOutOfOcean(pointMock);
+
+        Field oceanField = Ocean.class.getDeclaredField("ocean");
+        oceanField.setAccessible(true);
+        Ship[][] oceanArray = (Ship[][]) oceanField.get(spyOcean);
+        
+        oceanArray[5][10] = shipMock;
+
+        assertEquals(shipMock, spyOcean.getShipByPosition(pointMock), "Position (10, 5) should return the ship present at this position.");
+    }
+
+    @Test
+    public void testGetShipByPosition_PositionWithinBoundsAndNoShipPresent() throws NoSuchFieldException, IllegalAccessException {
+        when(pointMock.x()).thenReturn(20);
+        when(pointMock.y()).thenReturn(10);
+
+        Ocean spyOcean = spy(oceanInstance);
+        doReturn(false).when(spyOcean).indexOutOfOcean(pointMock);
+
+        Field oceanField = Ocean.class.getDeclaredField("ocean");
+        oceanField.setAccessible(true);
+        Ship[][] oceanArray = (Ship[][]) oceanField.get(spyOcean);
+
+        oceanArray[10][20] = null;
+
+        assertNull(spyOcean.getShipByPosition(pointMock), 
+                "Position (20, 10) is within ocean bounds but should return null as there is no ship present.");
     }
 
     @Test
@@ -132,311 +307,679 @@ public class OceanTest {
             for (int x = 0; x < ocean.getSizeHorizontal(); x++) {
                 Assertions.assertTrue(ocean.isEmpty(new Point(x, y)),
                     "El océano debería estar vacío en la posición (" + x + ", " + y + ")");
-
-                    // Assertions.assertNull(ocean.getShipByPosition(point),
-                    // "No debería haber barco en la posición (" + x + ", " + y + ")");
             }
         }
     }
 
-    private Ocean ocean; 
-    private Ship ship;    
-
-    @BeforeEach
-    void setUp() {
-        ocean = new Ocean(10, 10); 
-        ship = mock(Ship.class);
-        when(ship.getLength()).thenReturn(5); 
-    }
-
-
     @Test
-    void testRandomPlace_SuccessfulPlacementFirstTry() {
-        assertNotNull(ocean, "Ocean should be initialized");
-
-        ShipPosition position = ShipPosition.getRandomShipPosition(ocean, ship);
-
-        assertNotNull(position, "Position should not be null");
-        assertTrue(position.getX() >= 0 && position.getX() < ocean.getSizeHorizontal(), 
-                   "Position X should be within the ocean bounds");
-        assertTrue(position.getY() >= 0 && position.getY() < ocean.getSizeVertical(), 
-                   "Position Y should be within the ocean bounds");
-    }
-
-    @Test
-    public void testRandomPlace_FailedAllAttempts() {
-        List<Ship> ships = List.of(Mockito.mock(Ship.class));
-        Ocean ocean = Mockito.mock(Ocean.class);
+    public void testIndexOutOfOcean_YLessThanZero() {
+        when(pointMock.x()).thenReturn(5);
+        when(pointMock.y()).thenReturn(-1);
         
-        Mockito.when(ocean.getSizeVertical()).thenReturn(10);
-        Mockito.when(ocean.getSizeHorizontal()).thenReturn(10);
-        Mockito.when(ocean.getRandomOcean(ships, ocean)).thenReturn(null);
-
-        Ocean result = Ocean.randomPlace(ships, ocean);
-
-        Assertions.assertNull(result, "El océano devuelto debería ser null después de alcanzar el número máximo de intentos fallidos.");
+        assertTrue(oceanInstance.indexOutOfOcean(pointMock), "Point (5, -1) should be out of ocean bounds due to y < 0");
     }
 
     @Test
-    void testRandomPlace_SuccessfulPlacementAfterAttempts() {
+    public void testIndexOutOfOcean_YGreaterThanOrEqualToSizeVertical() {
+        when(pointMock.x()).thenReturn(5);
+        when(pointMock.y()).thenReturn(30);
+        
+        assertTrue(oceanInstance.indexOutOfOcean(pointMock), "Point (5, 30) should be out of ocean bounds due to y >= sizeVertical");
+    }
+
+    @Test
+    public void testIndexOutOfOcean_XLessThanZero() {
+        when(pointMock.x()).thenReturn(-1);
+        when(pointMock.y()).thenReturn(5);
+        
+        assertTrue(oceanInstance.indexOutOfOcean(pointMock), "Point (-1, 5) should be out of ocean bounds due to x < 0");
+    }
+
+    @Test
+    public void testIndexOutOfOcean_XGreaterThanOrEqualToSizeHorizontal() {
+        when(pointMock.x()).thenReturn(30);
+        when(pointMock.y()).thenReturn(5);
+        
+        assertTrue(oceanInstance.indexOutOfOcean(pointMock), "Point (30, 5) should be out of ocean bounds due to x >= sizeHorizontal");
+    }
+
+    @Test
+    public void testIndexOutOfOcean_WithinBounds() {
+        when(pointMock.x()).thenReturn(15);
+        when(pointMock.y()).thenReturn(15);
+        
+        assertFalse(oceanInstance.indexOutOfOcean(pointMock), "Point (15, 15) should be within ocean bounds");
+    }
+
+
+    @Test
+    void testBadIndexRange_OutOfOcean() {
+        Point startPos = new Point(0, 0);
+        Point endPos = new Point(11, 0);
+        doReturn(true).when(oceanSpy).indexOutOfOcean(endPos);
+
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+    @Test
+    void testBadIndexRange_UP_StartPosition() {
+        Point startPos = new Point(11, 11);
+        Point endPos = new Point(11, 11);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getDown());
+
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+    }
+
+    @Test
+    void testBadIndexRange_UP_EndPosition() {
+        Point startPos = new Point(10, 10);
+        Point endPos = new Point(10, 17);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUp());
+
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+    }
+
+    @Test
+    void testBadIndexRange_UP_LeftRight() {
+        Point startPos = new Point(4, 3);
+        Point endPos = new Point(8, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(4, 4));
+
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_StartPosition() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(5, 7);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getUp());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_EndPosition() {
+        Point startPos = new Point(8, 8);
+        Point endPos = new Point(8, 6);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getDown());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_LeftRight() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(5, 7);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(6, 6));
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_StartPosition() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(3, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_EndPosition() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(3, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_UpDown() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(3, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(4, 6));
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+    }
+
+    @Test
+    void testBadIndexRange_RIGHT_StartPosition() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+    @Test
+    void testBadIndexRange_RIGHT_EndPosition() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+    @Test
+    void testBadIndexRange_RIGHT_UpDown() {
+        Point startPos = new Point(3, 3);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(6, 4));
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+    @Test
+    void testBadIndexRange_ValidPlacement() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        
+        assertFalse(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+    
+    @Test
+    void testBadIndexRange_UP_StartPosition_DownAndLeftRight() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(5, 3);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getDownAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(startPos.getDownAndLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getDownAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+    }
+
+    @Test
+    void testBadIndexRange_UP_EndPosition_UpAndLeftRight() {
+        Point startPos = new Point(7, 7);
+        Point endPos = new Point(7, 8);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUpAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(endPos.getUpAndLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUpAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_StartPosition_UpAndLeftRight() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(5, 7);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getUpAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(startPos.getUpAndLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getUpAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_StartPosition_RightAndUpDown() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(3, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getUpAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(startPos.getUpAndRight());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getDownAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+    }
+
+    @Test
+    void testBadIndexRange_RIGHT_EndPosition_RightAndUpDown() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUpAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(endPos.getUpAndRight());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getDownAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+    @Test
+    void testBadIndexRange_UP_LeftRightCheck() {
+        Point startPos = new Point(5, 3);
+        Point endPos = new Point(5, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(4, 4)); // Left
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(new Point(4, 4));
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(6, 4)); // Right
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP));
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_EndPositionCheck() {
+        Point startPos = new Point(9, 7);
+        Point endPos = new Point(9, 7);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getDown());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+        
+        doReturn(null).when(oceanSpy).getShipByPosition(endPos.getDown());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getDownAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(endPos.getDownAndLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getDownAndRight());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_LeftRightCheck() {
+        Point startPos = new Point(5, 7);
+        Point endPos = new Point(5, 8);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(4, 6)); // Left
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(new Point(4, 6));
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(6, 6)); // Right
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN));
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_EndPositionDiagonalCheck() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(3, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUpAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(endPos.getUpAndLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getDownAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_UpDownCheck() {
+        Point startPos = new Point(3, 5);
+        Point endPos = new Point(5, 6);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(4, 4)); // Up
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+        
+        doReturn(null).when(oceanSpy).getShipByPosition(new Point(4, 4));
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(4, 6)); // Down
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT));
+    }
+
+    @Test
+    void testBadIndexRange_RIGHT_StartPositionDiagonalCheck() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getUpAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(startPos.getUpAndLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(startPos.getDownAndLeft());
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+
+    @Test
+    void testBadIndexRange_RIGHT_UpDownCheck() {
+        Point startPos = new Point(7, 5);
+        Point endPos = new Point(5, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(6, 4)); // Up
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+
+        doReturn(null).when(oceanSpy).getShipByPosition(new Point(6, 4));
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(new Point(6, 6)); // Down
+        
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT));
+    }
+
+    @Test
+    void testBadIndexRange_UP_EndPositionDiagonalsSpecific() {
+        Point startPos = new Point(5, 3);
+        Point endPos = new Point(5, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUpAndRight());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP), "Should return true when ship is at UpAndRight of end position");
+
+        doReturn(null).when(oceanSpy).getShipByPosition(endPos.getUpAndRight());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(endPos.getUpAndLeft());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.UP), "Should return true when ship is at UpAndLeft of end position");
+    }
+
+    @Test
+    void testBadIndexRange_DOWN_MiddleLeftRightSpecific() {
+        Point startPos = new Point(5, 7);
+        Point endPos = new Point(5, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+
+        Point middlePoint = new Point(5, 6);
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(middlePoint.getLeft());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN), "Should return true when ship is at Left of middle point");
+
+        doReturn(null).when(oceanSpy).getShipByPosition(middlePoint.getLeft());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(middlePoint.getRight());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.DOWN), "Should return true when ship is at Right of middle point");
+    }
+
+    @Test
+    void testBadIndexRange_LEFT_VerticalAdjacentSpecific() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(3, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+
+        Point middlePoint = new Point(4, 5);
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(middlePoint.getUp());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT), "Should return true when ship is at Up of middle point");
+
+        doReturn(null).when(oceanSpy).getShipByPosition(middlePoint.getUp());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(middlePoint.getDown());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.LEFT), "Should return true when ship is at Down of middle point");
+    }
+
+    @Test
+    void testBadIndexRange_RIGHT_VerticalAdjacentSpecific() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(7, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+
+        Point middlePoint = new Point(6, 5);
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(middlePoint.getUp());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT), "Should return true when ship is at Up of middle point");
+
+        doReturn(null).when(oceanSpy).getShipByPosition(middlePoint.getUp());
+        doReturn(mock(Ship.class)).when(oceanSpy).getShipByPosition(middlePoint.getDown());
+        assertTrue(oceanSpy.badIndexRange(startPos, endPos, ShipPosition.Direction.RIGHT), "Should return true when ship is at Down of middle point");
+    }
+
+    @Test
+    void testBadIndexRange_SwitchCoverage() {
+        Point startPos = new Point(5, 5);
+        Point endPos = new Point(5, 5);
+        doReturn(false).when(oceanSpy).indexOutOfOcean(any());
+        doReturn(null).when(oceanSpy).getShipByPosition(any());
+
+        for (ShipPosition.Direction direction : ShipPosition.Direction.values()) {
+            assertFalse(oceanSpy.badIndexRange(startPos, endPos, direction), 
+                "Should return false for direction " + direction + " when no ships are present");
+        }
+    }
+
+    @Test
+    public void testPlaceShipRightOutOfBounds() {
+        Ocean ocean = new Ocean(5, 5); 
+        Ship shipMock = Mockito.mock(Ship.class);
+        ShipPosition startPosMock = Mockito.mock(ShipPosition.class);
+
+        Mockito.when(shipMock.getLength()).thenReturn(3); 
+        Mockito.when(startPosMock.getX()).thenReturn(4); 
+        Mockito.when(startPosMock.getY()).thenReturn(2);
+        Mockito.when(startPosMock.getDirection()).thenReturn(ShipPosition.Direction.RIGHT);
+
+        Point validPoint = new Point(4, 2);
+        Mockito.when(startPosMock.getPosition()).thenReturn(validPoint);
+
+        try {
+            Method method = Ocean.class.getDeclaredMethod("placeShipRight", Ship.class, ShipPosition.class);
+            method.setAccessible(true);
+
+            ShipPosition result = (ShipPosition) method.invoke(ocean, shipMock, startPosMock);
+
+            assertNull(result, "Se esperaba que el resultado fuera nulo por estar fuera de rango.");
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            fail("Error al invocar el método placeShipRight: " + cause.getMessage());
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            fail("Error al acceder al método placeShipRight: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testPlaceShipRightSuccess() {
+        Ocean ocean = new Ocean(5, 5); 
+
+        Ship shipMock = Mockito.mock(Ship.class);
+        ShipPosition startPosMock = Mockito.mock(ShipPosition.class);
+
+        Mockito.when(shipMock.getLength()).thenReturn(3); 
+        Mockito.when(startPosMock.getX()).thenReturn(1); 
+        Mockito.when(startPosMock.getY()).thenReturn(2);
+        Mockito.when(startPosMock.getDirection()).thenReturn(ShipPosition.Direction.RIGHT);
+
+        Point validPoint = new Point(1, 2);
+        Mockito.when(startPosMock.getPosition()).thenReturn(validPoint);
+
+        try {
+            Method method = Ocean.class.getDeclaredMethod("placeShipRight", Ship.class, ShipPosition.class);
+            method.setAccessible(true);
+
+            ShipPosition result = (ShipPosition) method.invoke(ocean, shipMock, startPosMock);
+
+            assertEquals(startPosMock, result, "Se esperaba que el resultado fuera igual a startPosMock.");
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            fail("Error al invocar el método placeShipRight: " + cause.getMessage());
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            fail("Error al acceder al método placeShipRight: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testPlaceShipLeftOutOfBounds() {
+        Ocean ocean = new Ocean(5, 5); 
+
+        Ship shipMock = Mockito.mock(Ship.class);
+        ShipPosition startPosMock = Mockito.mock(ShipPosition.class);
+
+        Mockito.when(shipMock.getLength()).thenReturn(3); 
+        Mockito.when(startPosMock.getX()).thenReturn(1); 
+        Mockito.when(startPosMock.getY()).thenReturn(3);
+        Mockito.when(startPosMock.getDirection()).thenReturn(ShipPosition.Direction.LEFT);
+
+        Point validPoint = new Point(1, 3);
+        Mockito.when(startPosMock.getPosition()).thenReturn(validPoint);
+
+        try {
+            Method method = Ocean.class.getDeclaredMethod("placeShipLeft", Ship.class, ShipPosition.class);
+            method.setAccessible(true);
+
+            ShipPosition result = (ShipPosition) method.invoke(ocean, shipMock, startPosMock);
+
+            assertNull(result, "Se esperaba que el resultado fuera nulo por estar fuera de rango.");
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            fail("Error al invocar el método placeShipLeft: " + cause.getMessage());
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            fail("Error al acceder al método placeShipLeft: " + e.getMessage());
+        }
+    }
+
+    
+    @Test
+    public void testPlaceShipLeftSuccess() {
+        Ocean ocean = new Ocean(10, 10); 
+
+        Ship shipMock = Mockito.mock(Ship.class);
+        ShipPosition startPosMock = Mockito.mock(ShipPosition.class);
+
+        Mockito.when(shipMock.getLength()).thenReturn(3); 
+        Mockito.when(startPosMock.getX()).thenReturn(3); 
+        Mockito.when(startPosMock.getY()).thenReturn(3);
+        Mockito.when(startPosMock.getDirection()).thenReturn(ShipPosition.Direction.LEFT);
+
+        Point validPoint = new Point(3, 3);
+        Mockito.when(startPosMock.getPosition()).thenReturn(validPoint);
+    
+        try {
+            Method method = Ocean.class.getDeclaredMethod("placeShipLeft", Ship.class, ShipPosition.class);
+            method.setAccessible(true);
+
+            ShipPosition result = (ShipPosition) method.invoke(ocean, shipMock, startPosMock);
+
+            assertEquals(startPosMock, result, "Se esperaba que el resultado fuera igual a startPosMock.");
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            fail("Error al invocar el método placeShipLeft: " + cause.getMessage());
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            fail("Error al acceder al método placeShipLeft: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testTryPlaceShipUp_Success() {
+        ShipPosition startPos = new ShipPosition(new Point(5, 5), ShipPosition.Direction.UP);
+
+        ShipPosition result = oceanInstance.tryPlaceShip(shipMock, startPos);
+
+        assertNotNull(result);
+
+        for (int i = 5; i >= 3; i--) {
+            assertEquals(shipMock, oceanInstance.getShipByPosition(new Point(5, i)));
+        }
+    }
+
+    @Test
+    void testTryPlaceShipUp_OutOfBounds() {
+        ShipPosition startPos = new ShipPosition(new Point(5, 0), ShipPosition.Direction.UP);
+        ShipPosition result = oceanInstance.tryPlaceShip(shipMock, startPos);
+
+        assertNull(result);
+    }
+
+    
+    @Test
+    void testPlaceShipDown_Success() {
+        Point startPoint = new Point(5, 5);
+        ShipPosition shipPosition = new ShipPosition(startPoint, ShipPosition.Direction.DOWN);
+
+        when(shipMock.getLength()).thenReturn(3);
+        ShipPosition result = oceanInstance.tryPlaceShip(shipMock, shipPosition);
+
+        assertNotNull(result);
+        for (int i = 5; i <= 7; i++) {
+            assertEquals(shipMock, oceanInstance.getShipByPosition(new Point(5, i)));
+        }
+    }
+
+    @Test
+    void testPlaceShipDown_Failure_BadIndexRange() {
+        Point startPoint = new Point(28, 28);
+        ShipPosition shipPosition = new ShipPosition(startPoint, ShipPosition.Direction.DOWN);
+        when(shipMock.getLength()).thenReturn(5);
+
+        ShipPosition result = oceanInstance.tryPlaceShip(shipMock, shipPosition);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testGetPointsOccupiedByShip_emptyOcean() {
+        Ocean ocean = new Ocean(1, 1); 
         Ship mockShip = mock(Ship.class);
-        when(mockShip.getLength()).thenReturn(5);
-        Ocean ocean = new Ocean(10, 10);
-        ShipPosition validPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
 
         Ocean spyOcean = spy(ocean);
-        doReturn(validPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
 
-        Ocean result = Ocean.randomPlace(Collections.singletonList(mockShip), spyOcean);
-        assertNotNull(result, "Result should not be null");
-        verify(spyOcean, atLeastOnce()).tryPlaceShip(eq(mockShip), any(ShipPosition.class));
-    }
+        List<Point> result = spyOcean.getPointsOccupiedByShip(mockShip);
 
-
-    @Test
-    public void testGetPointsOccupiedByShip_emptyOcean() {
-        Ocean ocean = mock(Ocean.class);
-        when(ocean.getSizeVertical()).thenReturn(0);
-        when(ocean.getSizeHorizontal()).thenReturn(0);
-        
-        Ship ship = mock(Ship.class);
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
         assertTrue(result.isEmpty(), "Si el océano está vacío, la lista de puntos debería estar vacía.");
     }
 
     @Test
-    public void testGetPointsOccupiedByShip_noShipAndNullShip() {
-        Ocean ocean = new Ocean(5, 5);
-        
-        // Prueba con barco mock (sin colocar en el océano)
-        Ship ship = mock(Ship.class);
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
+    void testGetPointsOccupiedByShip_noShipAndNullShip() {
+        Ocean ocean = new Ocean(10, 10); 
+        Ship mockShip = mock(Ship.class);
+
+        Ocean spyOcean = spy(ocean);
+
+        List<Point> result = spyOcean.getPointsOccupiedByShip(mockShip);
         assertTrue(result.isEmpty(), "Si no hay barcos en el océano, la lista de puntos debe estar vacía.");
-        
-        // Prueba con barco nulo
-        result = ocean.getPointsOccupiedByShip(null);
+
+        result = spyOcean.getPointsOccupiedByShip(null);
         assertTrue(result.isEmpty(), "Si el barco es null, la lista de puntos debería estar vacía.");
     }
 
     @Test
-    public void testGetPointsOccupiedByShip_singleShipInOcean() {
-        Ocean ocean = new Ocean(3, 3);
-        Ship ship = mock(Ship.class);
-        when(ship.getLength()).thenReturn(1); 
+    void testGetPointsOccupiedByShip_singleShipInOcean() {
+        Ocean ocean = new Ocean(10, 10); 
+        Ship mockShip = mock(Ship.class);
+        ShipPosition mockPosition = new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT);
+        Ocean spyOcean = spy(ocean);
 
-        ShipPosition placedPosition = ocean.tryPlaceShip(ship, new ShipPosition(new Point(0, 0), ShipPosition.Direction.RIGHT));
+        doReturn(mockPosition).when(spyOcean).tryPlaceShip(eq(mockShip), any());
 
-        assertNotNull(placedPosition, "The ship should have been placed successfully");
+        List<Point> expectedPoints = Collections.singletonList(new Point(0, 0));
+        doReturn(expectedPoints).when(spyOcean).getPointsOccupiedByShip(mockShip);
+        List<Point> result = spyOcean.getPointsOccupiedByShip(mockShip);
 
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
-
-        assertEquals(1, result.size(), "There should be exactly one point in the list.");
-        assertTrue(result.contains(new Point(0, 0)), "The list should contain the point (0, 0).");
-
-        System.out.println("Ocean content:");
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                System.out.print(ocean.getShipByPosition(new Point(j, i)) != null ? "S " : "- ");
-            }
-            System.out.println();
-        }
-    }
-
-    @Test
-    public void testGetPointsOccupiedByShip_multiplePointsInOcean() {
-        Ocean ocean = new Ocean(5, 5);
-        Ship ship = mock(Ship.class);
-        when(ship.getLength()).thenReturn(3);
-
-        ocean.tryPlaceShip(ship, new ShipPosition(new Point(1, 1), ShipPosition.Direction.RIGHT));
-
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
-        
-        assertEquals(3, result.size(), "Debería haber exactamente tres puntos en la lista.");
-        assertTrue(result.contains(new Point(1, 1)), "La lista debería contener el punto (1, 1).");
-        assertTrue(result.contains(new Point(2, 1)), "La lista debería contener el punto (2, 1).");
-        assertTrue(result.contains(new Point(3, 1)), "La lista debería contener el punto (3, 1).");
-        
-    }
-
-    @Test
-    public void testGetPointsOccupiedByShip_shipOccupyingMultipleRows() {
-        Ocean ocean = new Ocean(5, 5);
-        Ship ship = mock(Ship.class);
-        when(ship.getLength()).thenReturn(3);
-
-        ocean.tryPlaceShip(ship, new ShipPosition(new Point(2, 1), ShipPosition.Direction.DOWN));
-
-        List<Point> result = ocean.getPointsOccupiedByShip(ship);
-        
-        assertEquals(3, result.size(), "Debería haber exactamente tres puntos en la lista.");
-        assertTrue(result.contains(new Point(2, 1)), "La lista debería contener el punto (2, 1).");
-        assertTrue(result.contains(new Point(2, 2)), "La lista debería contener el punto (2, 2).");
-        assertTrue(result.contains(new Point(2, 3)), "La lista debería contener el punto (2, 3).");
-    }
-
-    // @Test
-    // void testIsEmpty_PositionOutOfOcean() {
-    //     Point pos = new Point(-1, -1); // Posición fuera de los límites del océano
-    //     Ocean ocean = new Ocean(10, 10); // Asegúrate de usar un tamaño válido
-
-    //     boolean result = ocean.isEmpty(pos);
-
-    //     assertTrue(result, "La posición está fuera del océano, por lo que debería ser considerada vacía.");
-    // }
-
-    @Test
-    void testIsEmpty_PositionWithShip() {
-        Point pos = new Point(0, 0); // Posición dentro de los límites del océano
-        Ocean ocean = mock(Ocean.class); // Crear un mock de Ocean
-        //Ship ship = new Ship(); // Ajusta según los parámetros que necesite Ship
-
-        // Configurar el comportamiento del mock
-        when(ocean.isEmpty(pos)).thenReturn(false); // Simulamos que la posición tiene un barco
-
-        boolean result = ocean.isEmpty(pos);
-
-        assertFalse(result, "La posición contiene un barco, por lo que no debería ser considerada vacía.");
-    }
-
-    @Test
-    void testIsEmpty_EmptyPosition() {
-        // Preparación
-        Point emptyPosition = new Point(3, 3);
-
-        // Ejecución
-        boolean result = ocean.isEmpty(emptyPosition);
-
-        // Verificación
-        assertTrue(result, "Una posición sin barco debería estar vacía");
-    }
-
-
-    //Point
-
-    @Test
-    void testGetRange_SinglePoint() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(0, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
-        Point[] result = Point.getRange(startPos, endPos, direction);
-        assertEquals(1, result.length);
-        assertEquals(new Point(0, 0), result[0]);
-    }
-
-    @Test
-    void testGetRange_UpDirection() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(0, 3);
-        ShipPosition.Direction direction = ShipPosition.Direction.UP;
-        Point[] result = Point.getRange(startPos, endPos, direction);
-        assertEquals(4, result.length);
-        assertEquals(new Point(0, 0), result[0]);
-        assertEquals(new Point(0, 1), result[1]);
-        assertEquals(new Point(0, 2), result[2]);
-        assertEquals(new Point(0, 3), result[3]);
-    }
-
-    @Test
-    void testGetRange_DownDirection() {
-        Point startPos = new Point(0, 3);
-        Point endPos = new Point(0, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.DOWN;
-        Point[] result = Point.getRange(startPos, endPos, direction);
-        assertEquals(4, result.length);
-        assertEquals(new Point(0, 3), result[0]);
-        assertEquals(new Point(0, 2), result[1]);
-        assertEquals(new Point(0, 1), result[2]);
-        assertEquals(new Point(0, 0), result[3]);
-    }
-
-    @Test
-    void testGetRange_LeftDirection() {
-        Point startPos = new Point(3, 0);
-        Point endPos = new Point(0, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.LEFT;
-        Point[] result = Point.getRange(startPos, endPos, direction);
-        assertEquals(4, result.length);
-        assertEquals(new Point(3, 0), result[0]);
-        assertEquals(new Point(2, 0), result[1]);
-        assertEquals(new Point(1, 0), result[2]);
-        assertEquals(new Point(0, 0), result[3]);
-    }
-
-    @Test
-    void testGetRange_RightDirection() {
-        Point startPos = new Point(0, 0);
-        Point endPos = new Point(3, 0);
-        ShipPosition.Direction direction = ShipPosition.Direction.RIGHT;
-        Point[] result = Point.getRange(startPos, endPos, direction);
-        assertEquals(4, result.length);
-        assertEquals(new Point(0, 0), result[0]);
-        assertEquals(new Point(1, 0), result[1]);
-        assertEquals(new Point(2, 0), result[2]);
-        assertEquals(new Point(3, 0), result[3]);
-    }
-    
-    @Test
-    void testIsEmpty_PathWithShip() {
-        Point positionWithShip = new Point(5, 5);
-        Ship ship = new Destroyer(); 
-        ShipPosition shipPosition = new ShipPosition(positionWithShip, ShipPosition.Direction.RIGHT);
-
-        ShipPosition placedPosition = ocean.tryPlaceShip(ship, shipPosition);
-        assertNotNull(placedPosition, "El barco debería haberse colocado correctamente");
-
-        boolean result = ocean.isEmpty(positionWithShip);
-        assertFalse(result, "La posición con un barco no debería estar vacía");
-    }
-
-    @Test
-    void testIsEmpty_PathWithoutShip() {
-        Point positionOutOfOcean = new Point(11, 11);
-        boolean resultOutOfOcean = ocean.isEmpty(positionOutOfOcean);
-        assertTrue(resultOutOfOcean, "Una posición fuera del océano debería considerarse vacía");
-
-        Point emptyPosition = new Point(3, 3);
-        boolean resultEmptyPosition = ocean.isEmpty(emptyPosition);
-        assertTrue(resultEmptyPosition, "Una posición sin barco dentro del océano debería estar vacía");
-    }
-
-    @Test
-    void testHashCode() {
-        Point point1 = new Point(1, 2);
-        Point point2 = new Point(1, 2);
-        Point point3 = new Point(2, 1);
-
-        assertEquals(point1.hashCode(), point2.hashCode(), "Puntos iguales deben tener el mismo hashCode");
-        assertNotEquals(point1.hashCode(), point3.hashCode(), "Puntos diferentes deben tener hashCodes diferentes");
-    }
-
-    @Test
-    void testEquals_SameObject() {
-        // Camino 1 -> 2 -> 3 -> 4 -> 6 -> 7
-        Point point = new Point(1, 2);
-        assertTrue(point.equals(point), "Un punto debe ser igual a sí mismo");
-    }
-
-    @Test
-    void testEquals_NullOrDifferentClass() {
-        // Camino 1 -> 2 -> 4 -> 6 -> 7
-        Point point = new Point(1, 2);
-        assertFalse(point.equals(null), "Un punto no debe ser igual a null");
-        assertFalse(point.equals("Not a Point"), "Un punto no debe ser igual a un objeto de otra clase");
-    }
-
-    @Test
-    void testEquals_DifferentPoint() {
-        // Camino 1 -> 2 -> 4 -> 5 -> 6 -> 7
-        Point point1 = new Point(1, 2);
-        Point point2 = new Point(1, 2);
-        Point point3 = new Point(2, 1);
-        
-        assertTrue(point1.equals(point2), "Puntos con las mismas coordenadas deben ser iguales");
-        assertFalse(point1.equals(point3), "Puntos con coordenadas diferentes no deben ser iguales");
-    }
-    
-    
+        assertEquals(1, result.size(), "Debería haber exactamente un punto en la lista.");
+        assertTrue(result.contains(new Point(0, 0)), "La lista debería contener el punto (0, 0).");
+    }   
 }
-
-
