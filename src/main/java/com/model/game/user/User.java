@@ -1,15 +1,15 @@
 package com.model.game.user;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.model.game.AttackReport;
 import com.model.game.FiringMode;
 import com.model.game.Game;
 import com.model.game.ocean.Point;
 import com.model.ships.Ship;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class User implements StatusChangedListener {
     private int actionsCounter;
