@@ -61,11 +61,14 @@ public class ShipTest {
     @Test
     public void testHitTheShipWhenAlreadySunk() throws Exception {
         Field healthField = Ship.class.getDeclaredField("health");
+        healthField.setAccessible(true); 
+
         healthField.set(ship, 0);
+
         ship.hitTheShip(FiringMode.GENERAL_FIRING_MODE);
+
         int health = (int) healthField.get(ship);
         assertEquals(0, health, "La salud del barco debería permanecer en 0 tras estar hundido");
-
         assertNotNull(mockHealthReport);
     }
 
