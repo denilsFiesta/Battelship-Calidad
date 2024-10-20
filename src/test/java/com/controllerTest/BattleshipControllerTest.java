@@ -1,4 +1,11 @@
 package com.controllerTest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -6,86 +13,147 @@ import java.util.Scanner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.mock;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import com.CustomInputStream;
 import com.controller.BattleshipController;
 import com.model.game.user.User;
 import com.view.BattleshipView;
 public class BattleshipControllerTest {
-    private User mockUser;
-    private BattleshipView mockView;
-    @BeforeEach
-    public void setUp() {
-        mockUser = mock(User.class);
-        mockView = mock(BattleshipView.class);
+
+    private void setInputs(List<String> inputs){
+        CustomInputStream customInputStream = new CustomInputStream(inputs);
+        System.setIn(customInputStream);
     }
+
     @Test
     public void testRequestForUserInput_correctInput(){
-        Scanner scannerSimulado = new Scanner("3\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("3\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
+
         int result = battleshipController.requestForUserInput("", 1, 5);
         assertEquals(3, result, "La entrada 3 es valida en el rango [1,5]");
     }
+
     @Test
     public void testRequestForUserInput_maxBoundError(){
-        Scanner scannerSimulado = new Scanner("7\n 3\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("7\n", "3\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
+
         int result = battleshipController.requestForUserInput("", 1, 5);
         assertEquals(3, result, "La entra 7 no es valida en el rango [1,5]");
     }
+
     @Test
     public void testRequestForUserInput_minBoundError(){
-        Scanner scannerSimulado = new Scanner("0\n 3\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("0\n", "3\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
+
         int result = battleshipController.requestForUserInput("", 1, 5);
         assertEquals(3, result, "La entra 0 es valida en el rango [1,5]");
     }
+
     @Test
     public void testRequestForUserInput_tryCatchError(){
-        Scanner scannerSimulado = new Scanner("a 3\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("a\n", "3\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
+
         int result = battleshipController.requestForUserInput("", 1, 5);
         assertEquals(3, result, "La entra a es valida en el rango [1,5]");
     }
+
     @Test
     public void testStartGame_validInput(){
-        Scanner scannerSimulado = new Scanner("10 10 0 0 0 0 1 1 1 1\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList(
+            "0 0 0 0 0\n",    
+            "1 0 1\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = Mockito.spy(new BattleshipController());
+        Mockito.doReturn(10).doReturn(15).when(battleshipController).requestForUserInput(anyString(), eq(1), eq(30));
+        
         battleshipController.startGame();
+
+        verify(battleshipController, times(2)).requestForUserInput(anyString(), eq(1), eq(30));
     }
+
     @Test
     public void testStartGame_invalidInput(){
-        Scanner scannerSimulado = new Scanner("10 10 5 5 5 5 5 2\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList(
+            "5 5 5 5 5\n",    
+            "2\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = Mockito.spy(new BattleshipController());
+        Mockito.doReturn(1).doReturn(1).when(battleshipController).requestForUserInput(anyString(), eq(1), eq(30));
+
         battleshipController.startGame();
+
+        verify(battleshipController, times(2)).requestForUserInput(anyString(), eq(1), eq(30));
     }
+
     @Test
     public void testStartGameArgs_correctInput(){
         int args[] = {10, 10, 0, 0, 0, 0, 1}; 
-        Scanner scannerSimulado = new Scanner("1 1 1\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("1 1 1\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
     }
+
     @Test
     public void testStartGameArgs_invalidInput(){
-        int args[] = {10, 10, 5, 5, 5, 5, 5}; 
-        Scanner scannerSimulado = new Scanner("2\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        int args[] = {1, 1, 5, 5, 5, 5, 5}; 
+        List<String> inputs = Arrays.asList("2\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
     }
+
     @Test
     public void testGetShipsCounters_correcInput(){
-        Scanner scannerSimulado = new Scanner("10 10 0 0 0 0 1 1 1 1\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("10 10 0 0 0 0 1 1 1 1\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame();
     }
+
     @Test
     public void testGetShipsCounters_incorrectInput(){
-        Scanner scannerSimulado = new Scanner("10 10 -1 0 0 0 0 1 1 1 1\n"); 
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        List<String> inputs = Arrays.asList("10 10 -1 0 0 0 0 0 2 2\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame();
     }
+
+    @Test
+    public void testGetShipsCounters_LettersInput(){
+        List<String> inputs = Arrays.asList(
+            "10 10\n",
+            "a 0 0 0 0 0\n",
+            "2 2\n"
+        );
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame();
+    }
+
     @Test
     public void testExecuteCommands_HelpAndWinCommand(){
         int args[] = {10, 10, 0, 0, 0, 0, 0};
@@ -94,13 +162,13 @@ public class BattleshipControllerTest {
             "help\n",
             "0 0\n"
         );
+        setInputs(inputs);
 
-        CustomInputStream customInputStream = new CustomInputStream(inputs);
-        Scanner scannerSimulado = new Scanner(customInputStream);
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
         battleshipController.executeCommands();
     }
+
     @Test
     public void testExecuteCommands_ExitCommand(){
         int args[] = {10, 10, 0, 0, 0, 0, 0};
@@ -108,11 +176,255 @@ public class BattleshipControllerTest {
             "1 0 1\n",
             "exit\n"
         );
+        setInputs(inputs);
 
-        CustomInputStream customInputStream = new CustomInputStream(inputs);
-        Scanner scannerSimulado = new Scanner(customInputStream);
-        BattleshipController battleshipController = new BattleshipController(scannerSimulado);
+        BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
         battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testExecuteCommands_NoInput(){
+        int args[] = {10, 10, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "1 0 1\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testExecuteCurrentCommands_HitAShip(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "2 1\n",
+            "0 0\n",
+            "1 1\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testExecuteCurrentCommands_ModeTorpedo(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "T 0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testExecuteCurrentCommands_HitNoShips(){
+        int args[] = {2, 2, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "2 1\n",
+            "0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_TorpedoAttackOrder(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "t 0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_TorpedoAttackOrderFailed(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "a 0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_TorpedoAttackOrderTwo(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "T 0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_AttackOrderSimple(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_ManyParameters(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "0 0 0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_OneParameter(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_TwoBadParameters(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "a a\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCorrectInput_TopedoBadParameters(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "t a a\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
+
+    @Test
+    public void testCreateNewGame_GameCreatedNoErrors(){
+        int args[] = {2, 2, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "2 1\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
+
+    @Test
+    public void testCreateNewGame_GameNoCreatedNewGame(){
+        int args[] = {2, 2, 10, 10, 10, 10, 10};
+        List<String> inputs = Arrays.asList(
+            "1\n",
+            "10 10\n",
+            "0 0 0 0 0\n",    
+            "2 1\n"  
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
+
+    @Test
+    public void testCreateNewGame_GameNoCreatedExit(){
+        int args[] = {2, 2, 10, 10, 10, 10, 10};
+        List<String> inputs = Arrays.asList("2\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
+
+    @Test
+    public void testRequestForRecoveryMode_ModeEnabled(){
+        int args[] = {1, 1, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList("2 1\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
+
+    @Test
+    public void testRequestForRecoveryMode_ModeDisabled(){
+        int args[] = {1, 1, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList("2 2\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
+
+    @Test
+    public void testRequestForTorpedoMode_ModeEnabled(){
+        int args[] = {1, 1, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList("1 0 2\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
+
+    @Test
+    public void testRequestForTorpedoMode_ModeDisabled(){
+        int args[] = {1, 1, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList("2 2\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
     }
 }
