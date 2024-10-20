@@ -211,4 +211,18 @@ public class BattleshipControllerTest {
         battleshipController.startGame(args);
         battleshipController.executeCommands();
     }
+
+    @Test
+    public void testExecuteCurrentCommands_HitNoShips(){
+        int args[] = {2, 2, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList(
+            "2 1\n",
+            "0 0\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
 }
