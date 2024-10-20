@@ -34,7 +34,7 @@ public class BattleshipController {
             horizontal = requestForUserInput("Enter the horizontal size of the ocean (from 1 to 30):",
                     1, 30);
         }
-        System.out.println("Nya1 " + horizontal);
+        
         int vertical = -1;
         while (vertical == -1) {
             vertical = requestForUserInput("Enter the vertical size of the ocean (from 1 to 30):",
