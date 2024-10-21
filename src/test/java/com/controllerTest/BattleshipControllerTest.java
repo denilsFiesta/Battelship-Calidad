@@ -349,4 +349,19 @@ public class BattleshipControllerTest {
         BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
     }
+
+    @Test
+    public void testCreateNewGame_GameNoCreatedNewGame(){
+        int args[] = {2, 2, 10, 10, 10, 10, 10};
+        List<String> inputs = Arrays.asList(
+            "1\n",
+            "10 10\n",
+            "0 0 0 0 0\n",    
+            "2 1\n"  
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
 }
