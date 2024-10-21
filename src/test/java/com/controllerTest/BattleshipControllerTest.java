@@ -407,4 +407,14 @@ public class BattleshipControllerTest {
         BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
     }
+
+    @Test
+    public void testRequestForTorpedoMode_ModeEnabled(){
+        int args[] = {1, 1, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList("1 0 2\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
 }
