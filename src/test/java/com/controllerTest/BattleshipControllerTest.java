@@ -374,4 +374,14 @@ public class BattleshipControllerTest {
         BattleshipController battleshipController = new BattleshipController();
         battleshipController.startGame(args);
     }
+
+    @Test
+    public void testRequestForRecoveryMode_ModeEnabled(){
+        int args[] = {1, 1, 0, 0, 0, 0, 0};
+        List<String> inputs = Arrays.asList("2 1\n");
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+    }
 }
