@@ -134,7 +134,20 @@ public class BattleshipControllerTest {
 
     @Test
     public void testGetShipsCounters_incorrectInput(){
-        List<String> inputs = Arrays.asList("10 10 -1 0 0 0 0 1 1 1 1\n");
+        List<String> inputs = Arrays.asList("10 10 -1 0 0 0 0 0 2 2\n");
+        setInputs(inputs);
+
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame();
+    }
+
+    @Test
+    public void testGetShipsCounters_LettersInput(){
+        List<String> inputs = Arrays.asList(
+            "10 10\n",
+            "a 0 0 0 0 0\n",
+            "2 2\n"
+        );
         setInputs(inputs);
 
         BattleshipController battleshipController = new BattleshipController();

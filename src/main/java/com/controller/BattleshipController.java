@@ -34,7 +34,7 @@ public class BattleshipController {
             horizontal = requestForUserInput("Enter the horizontal size of the ocean (from 1 to 30):",
                     1, 30);
         }
-        
+
         int vertical = -1;
         while (vertical == -1) {
             vertical = requestForUserInput("Enter the vertical size of the ocean (from 1 to 30):",
@@ -109,7 +109,7 @@ public class BattleshipController {
                         counters[i] = scanner.nextInt();
                         if (counters[i] >= 0)
                             break;
-                    }
+                    }else scanner.next();
                     System.out.println("Enter integer number no less than 0: ");
                 }
             }
