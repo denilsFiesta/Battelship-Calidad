@@ -323,4 +323,18 @@ public class BattleshipControllerTest {
         battleshipController.startGame(args);
         battleshipController.executeCommands();
     }
+
+    @Test
+    public void testCorrectInput_TopedoBadParameters(){
+        int args[] = {2, 2, 0, 0, 0, 1, 0};
+        List<String> inputs = Arrays.asList(
+            "1 1 1\n",
+            "t a a\n"
+        );
+        setInputs(inputs);
+        
+        BattleshipController battleshipController = new BattleshipController();
+        battleshipController.startGame(args);
+        battleshipController.executeCommands();
+    }
 }
